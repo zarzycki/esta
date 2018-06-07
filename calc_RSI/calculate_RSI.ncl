@@ -120,7 +120,7 @@ popThresh=(/51553600.0,27571556.0,2886427.0,171896.0/)
 areaThresh = areaThresh * (183011./178509.)
 popThresh = popThresh * (5808./6259.)
 
-sumsArray = new(4,"float")
+sumsArray = new(4,"float",-99.9)
 areaArray = sumsArray
 popArray = sumsArray
 ;areaArray=(/152068.0,97897.0,56343.0,28830.0/)
@@ -183,7 +183,7 @@ print(sum(sumsArray))
 
 quote = inttochar(34)
 delim=","
-system("echo "+quote +stormFilePath+delim+ensmember+delim+sprinti("%0.5i", stormID)+delim+STTIME+delim+sprinti("%0.3i", DURTIME)+delim+sprintf("%6.2f", RSIval)+delim+RSIcat    +quote+" >> "+RSIoutFile)
+system("echo "+quote +stormFilePath+delim+ensmember+delim+sprinti("%0.5i", stormID)+delim+STTIME+delim+sprinti("%0.3i", DURTIME)+delim+sprintf("%6.2f", RSIval)+delim+RSIcat+delim+areaArray(0)+delim+popArray(0)+delim+areaArray(1)+delim+popArray(1)+delim+areaArray(2)+delim+popArray(2)+delim+areaArray(3)+delim+popArray(3)    +quote+" >> "+RSIoutFile)
 
 
 ;1	1–3	Notable

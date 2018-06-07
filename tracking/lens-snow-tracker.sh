@@ -12,7 +12,7 @@ date
 
 NUMID=$1
 
-DO_TEMPEST=true           # Do we do Lagrangian/Tempest trajectories?
+DO_TEMPEST=false           # Do we do Lagrangian/Tempest trajectories?
 DO_CONNTRACK=false         # Do we do "connected" trajectories?
 PROCESS_TEMPEST=true       # Do we extract/calc RSI for Lagrangian/Tempest trajectories?
 PROCESS_CONNTRACK=false    # Do we extract/calc RSI for "connected" trajectories?
@@ -21,11 +21,11 @@ SWE="12"                   # snow water equivalent (12 = default, 9-13 is probab
 THRESH="5e-9"              # Connected trajectory threshold (area average precipitation)
 
 MODEL="LENS"
-RUNDATES="1990010100Z-2005123118Z"
-#RUNDATES="2026010100Z-2035123118Z"
+#RUNDATES="1990010100Z-2005123118Z"
+RUNDATES="2026010100Z-2035123118Z"
 #RUNDATES="2071010100Z-2080123118Z"
-RUNCONFIG="B20TRC5CNBDRD"
-#RUNCONFIG="BRCP85C5CNBDRD"
+#RUNCONFIG="B20TRC5CNBDRD"
+RUNCONFIG="BRCP85C5CNBDRD"
 CONFIG=${THRESH}"_"${SWE}
 
 # Logic for LENS members done at U Toronto
@@ -193,12 +193,12 @@ if [ ${PROCESS_TEMPEST} == 'true' ]; then
     LOOPEN=$((`grep -c start ${TRAJFILE}` - 1))
     for IX in `seq ${LOOPST} ${LOOPEN}`
     do
-      ncl ${RSIDIR}/calculate_RSI.ncl stormID=${IX} SWE=${SWES[${LOOPVAR}]} \
+      (set -x; ncl ${RSIDIR}/calculate_RSI.ncl stormID=${IX} SWE=${SWES[${LOOPVAR}]} \
        'imgDir="'${RSIOUTDIR}'/images-RSI-tempest/'${MODEL}'.'${RUNDATES:0:4}'.'${NUMID}'"' \
        'RSIoutFile="'${RSIOUTDIR}/${RSISNOWFILES[${LOOPVAR}]}'"' \
        'stormFilePath="'${EXTRACTOUTDIR}/${EXTRACTOUTFILE}'"' \
        'configStr="'${DESCSTR}'"' \
-       'SNOWVARNAME="'${SNOWVARNAMES[${LOOPVAR}]}'"'
+       'SNOWVARNAME="'${SNOWVARNAMES[${LOOPVAR}]}'"')
     done
   done
   endtimeRSI=$(date -u +"%s")
