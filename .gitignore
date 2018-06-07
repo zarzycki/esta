@@ -1,0 +1,4 @@
+traj/
+population.nc
+*.out
+*.mod

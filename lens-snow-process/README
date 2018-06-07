@@ -1,8 +1,0 @@
-Code used to process LENS data to get precipition type and SWE ratio using 6-hourly state data
-
-
-ifort -fPIC -shared-intel -mcmodel=large process_snow.f90 omcalc_ccm.f rvdv.f phybrid_ccm.f int2p_dp.f relhum_dp.f -o 1out
-
-
-
-
