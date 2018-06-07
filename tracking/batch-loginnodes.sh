@@ -29,7 +29,10 @@ do
 done
 
 # Launch GNU parallel
+#### Use this for login nodes (nohup ./batch.sh &)
 #parallel --jobs ${NUMCORES} < ${COMMANDFILE}
+
+#### Use this for Cheyenne batch jobs
 parallel --jobs ${NUMCORES} -u --sshloginfile $PBS_NODEFILE --workdir $PWD < ${COMMANDFILE}
 
 rm ${COMMANDFILE}
