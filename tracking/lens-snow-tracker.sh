@@ -15,9 +15,9 @@ NUMID=$1
 DO_TEMPEST=false           # Do we do Lagrangian/Tempest trajectories?
 DO_CONNTRACK=false        # Do we do "connected" trajectories?
 PROCESS_TEMPEST=false      # Do we extract/calc RSI for Lagrangian/Tempest trajectories?
-PROCESS_CONNTRACK=false   # Do we extract/calc RSI for "connected" trajectories?
-SEASONFRAC_TEMPEST=true
-SEASONFRAC_CONNTRACK=true
+PROCESS_CONNTRACK=true   # Do we extract/calc RSI for "connected" trajectories?
+SEASONFRAC_TEMPEST=false
+SEASONFRAC_CONNTRACK=false
 
 SWE="12"                   # snow water equivalent (12 = default, 9-13 is probably acceptable range)
 THRESH="5e-9"              # Connected trajectory threshold (area average precipitation)
