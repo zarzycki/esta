@@ -11,8 +11,8 @@ load "functions.ncl"
 ;========================================================
 begin
 
-;infile="trajectories.txt.LENS.5e-9_11.004"
-;outfile="err"
+infile="trajectories.txt.CORI.VR28.NATL.WAT.CAM5.4CLM5.0.dtime900.003"
+outfile="traj"
 
 system("rm "+outfile)
 
@@ -25,15 +25,15 @@ threshold = 8.0
 firstmm=10
 lastmm=4
 
-ncols = 9 ; number of columns in non-header rows of trajectory file
+ncols = 8 ; 9 for LENS 
 maxLines = -1  ; set to -1 for auto-detection
 traj_data = getTrajectories(infile,ncols,maxLines)
 
-; need to be modified to 2,3,4 if using latlon data
-lon = traj_data(:,2,:)
-lat = traj_data(:,3,:)
-pres = traj_data(:,4,:)/100.
-month = toint(traj_data(:,6,:))
+; need to be modified to 2,3,4,6 if using LENS/latlon data
+lon = traj_data(:,1,:)
+lat = traj_data(:,2,:)
+pres = traj_data(:,3,:)/100.
+month = toint(traj_data(:,5,:))
 ndims = dimsizes(lon)
 nstorms = ndims(0)
 ntimesall = ndims(1)

@@ -6,42 +6,13 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_code.ncl"
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_csm.ncl"
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/contributed.ncl"
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/shea_util.ncl"
-load "/glade/u/home/zarzycki/ncl/functions/getTrajectories.ncl"
-
+load "/global/homes/c/czarzyck/ncl-zarzycki/functions/getTrajectories.ncl"
+load "fcns-extract-storm.ncl"
 ;========================================================
+
 begin
 
 wcStrt     = systemfunc("date")
-
-; NL VARS
-snowFileFull="/glade/u/home/zarzycki/scratch/LENS-snow/b.e11.BRCP85C5CNBDRD.f09_g16.002.cam.h2.PRECT_SNOW.2071010100Z-2080123118Z.nc"
-SNOWVARNAME="PRECT_SNOW"
-traj_filename="./traj/conntraj.LENS.2071.002.5e-9_12"
-outDir="/glade/scratch/zarzycki/LES-snow/storm-files/"
-outFileName="ind-storms.LENS.2071.002.5e-9_12.nc_TEST.nc"
-
-doPrecip=False
-doPSL=False
-
-; How big of a window around track lat/lon do we want to take?
-deltaLat=15.0
-deltaLon=15.0
-
-doTimeSeries=True
-doRegionalOutput=True
-
-; If yes, truncation output
-if (doRegionalOutput) then
-  minLatOut=22.
-  maxLatOut=55.
-  minLonOut=265.
-  maxLonOut=307.
-else
-  minLatOut=-90.
-  maxLatOut=90.
-  minLonOut=0.
-  maxLonOut=360.
-end if
 
 ;----------------Constants-----------------------------------
 
@@ -50,20 +21,65 @@ pi = 3.14159265358979
 omega = 7.2921E-5
 ms_to_inhr=141732.
 
+; NL VARS +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+;list_of_files="/global/homes/c/czarzyck/scratch/hyperion/CORI.VR28.NATL.WAT.CAM5.4CLM5.0.dtime900.003/atm/hist/*cam.h8.1986*.PTYPES.nc_remap.nc"
+;VARNAME="PRECB_SN"
+;traj_filename="./traj"
+;outDir="/global/homes/c/czarzyck/scratch/hyperion/"
+;outFileName="TEST.nc"
+;AGGRO_OPERATOR="sum"  ; sum, avg, min, max
+;offset=6*ms_to_inhr
+;deltaDeg=15.0
+;doTimeSeries=True
+;doRegionalOutput=False
+;forceDeleteOutput=True
+
+list_of_files="/global/homes/c/czarzyck/scratch/hyperion/CORI.VR28.NATL.WAT.CAM5.4CLM5.0.dtime900.003/atm/hist/*cam.h3.1986*_remap.nc"
+VARNAME="FLUT"
+traj_filename="./traj"
+outDir="/global/homes/c/czarzyck/scratch/hyperion/"
+outFileName="TEST.nc"
+AGGRO_OPERATOR="min"  ; sum, avg, min, max
+offset=1.
+deltaDeg=200.0
+doTimeSeries=True
+doRegionalOutput=False
+forceDeleteOutput=False
+; NL VARS +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+;----------------Find min/max bounds-----------------------------------
+
+if (doRegionalOutput) then   ; If yes, truncation output
+  minLatOut=20.
+  maxLatOut=55.
+  minLonOut=-95.
+  maxLonOut=-60.
+else   ; if not, just set to very large neg/pos values since NCL indexes min/max auto this way
+  minLatOut=-99999.
+  maxLatOut=99999.
+  minLonOut=-99999.
+  maxLonOut=99999.
+end if
+
+;----------------Pack min/max lat/lon into single 4x1 var-----------------------------------
+
+latBounds=packLatLonBounds(minLatOut,maxLatOut,minLonOut,maxLonOut)
+
 ;-------------Get trajectories------------------------------
 
 thefile=traj_filename
-ncols = 9                     ; assign number of columns
+ncols = 8                     ; assign number of columns
 maxLines = -1
 traj_data = getTrajectories(thefile,ncols,maxLines)
 
-traj_lon = traj_data(:,2,:)
-traj_lat = traj_data(:,3,:)
-traj_pres = traj_data(:,4,:)/100.
-traj_yyyy = traj_data(:,5,:)
-traj_mm = traj_data(:,6,:)
-traj_dd = traj_data(:,7,:) 
-traj_hh = traj_data(:,8,:)
+traj_lon = traj_data(:,1,:)
+traj_lat = traj_data(:,2,:)
+traj_pres = traj_data(:,3,:)/100.
+traj_yyyy = traj_data(:,4,:)
+traj_mm = traj_data(:,5,:)
+traj_dd = traj_data(:,6,:) 
+traj_hh = traj_data(:,7,:)
 
 ndims = dimsizes(traj_lon)
 nstorms = ndims(0)
@@ -74,108 +90,59 @@ ntimes = ndims(1)
 
 ; Here we build a "lookup" table to find what times are on what files...
 ; get list of h3 files
-filelist = systemfunc ("ls "+snowFileFull)
-ftmp = addfile(filelist(0),"r")
-nfiles = dimsizes(filelist)
-nftimes = dimsizes(ftmp->time)
-timeArr = new((/nfiles,nftimes/),typeof(ftmp->time))
-do ii = 0,nfiles-1
-;do ii = 0,11
-  print("loading time for file #"+ii+" of "+(nfiles-1))
-  ftmp = addfile(filelist(ii),"r")
-  nftimes=dimsizes(ftmp->time)   ; needed since files at end of series may have less than rest
-  timeArr(ii,0:nftimes-1) = ftmp->time
-end do
+filelist = systemfunc ("ls "+list_of_files)
+timeArr=buildTimeLookup(filelist)
 
-; can get these from any arbitrary file
-lat=ftmp->lat({minLatOut:maxLatOut})
-lon=ftmp->lon({minLonOut:maxLonOut})
-timeunits=ftmp->time@units
-opt=0
-opt@calendar=ftmp->time@calendar
-delete(ftmp)
+;-------------get relevant coords------------------------------
+retlist=getCoords(filelist,latBounds)
+lat=retlist[0]
+lon=retlist[1]
+timeunits=retlist[2]
+opt=retlist[3]
+delete(retlist)
 
 ;-------------setup arrays------------------------------
 
 wcStrtExtract     = systemfunc("date")
 
-nlat=dimsizes(lat)
-nlon=dimsizes(lon)
-lat2D=conform_dims((/nlat,nlon/),lat,0) 
-lon2D=conform_dims((/nlat,nlon/),lon,1) 
-varArray=new((/nstorms,ntimes,nlat,nlon/),"double")
+retlist=setupArrays(nstorms,ntimes,lat,lon)
+lat2D=retlist[0]
+lon2D=retlist[1]
+SNOWFALL=retlist[2]
+sttime=retlist[3]
+entime=retlist[4]
+durtime=retlist[5]
+delete(retlist)
 
-varArray!0    = "storm"
-varArray!1    = "time"
-varArray!2    = "lat"
-varArray!3    = "lon"
-varArray&lat = lat
-varArray&lon = lon
+;-------------extract data from files------------------------------
 
-SNOWFALL=varArray
+SNOWFALL=loopAndExtract(SNOWFALL,VARNAME,lat2D,lon2D,deltaDeg,nstorms,ntimes,sttime,entime,durtime,traj_lon,traj_lat,traj_yyyy,traj_mm,traj_dd,traj_hh,timeArr,timeunits,opt,latBounds,offset)
 
-sttime=new(nstorms,"integer")
-entime=new(nstorms,"integer")
-durtime=new(nstorms,"integer")
-sttime!0    = "storm"
-entime!0    = "storm"
-durtime!0   = "storm"
+;-------------do summation------------------------------
 
-loaded_file=""   ; set loaded file to empty
-do j = 0,nstorms-1
-  print(" Storm #"+(j+1)+" of "+nstorms)
-  durtime(j)=0
-  do i = 0,ntimes-1
-    if (.not.ismissing(traj_lon(j,i))) then
-
-      print(i+"    "+ traj_yyyy(j,i)+" "+traj_mm(j,i)+" "+traj_dd(j,i)+" "+traj_hh(j,i) )
-      thisTime=cd_inv_calendar(traj_yyyy(j,i),traj_mm(j,i),traj_dd(j,i),traj_hh(j,i),0.0,0.0,timeunits,opt)
-      if (i .eq. 0) then
-        sttime(j)=toint(traj_yyyy(j,i))*1000000+toint(traj_mm(j,i))*10000+toint(traj_dd(j,i))*100+toint(traj_hh(j,i))
-      end if
-      durtime(j) = durtime(j)+6
-      entime(j)=toint(traj_yyyy(j,i))*1000000+toint(traj_mm(j,i))*10000+toint(traj_dd(j,i))*100+toint(traj_hh(j,i))
-    
-      ; look up time ix
-      time1d      = ndtooned(timeArr)
-      dsizes_time = dimsizes(timeArr)
-      indices  = ind_resolve(ind(time1d.eq.thisTime),dsizes_time)
-      fileix     = indices(0,0)
-      trackindex = indices(0,1)
-      needed_file=filelist(fileix)
-      if (needed_file .ne. loaded_file) then
-        ; need to load file
-        print("Currently loading... "+needed_file)
-        f1 = addfile(needed_file,"r")
-        loaded_file=needed_file
-      else
-        print("existing loaded file... "+loaded_file)
-      end if
-
-      thislat=traj_lat(j,i)
-      thislon=traj_lon(j,i)
-      thispres=traj_pres(j,i)
-
-      maxLat=thislat+deltaLat
-      minLat=thislat-deltaLat
-      maxLon=thislon+deltaLon
-      minLon=thislon-deltaLon
-
-      gcdist=gc_latlon(thislat,thislon,lat2D,lon2D,2,2)
-
-      print(trackindex+"")
-      SNOWFALL(j,i,:,:)=tofloat((f1->$SNOWVARNAME$(trackindex,{minLatOut:maxLatOut},{minLonOut:maxLonOut})))
-      SNOWFALL(j,i,:,:)=where(gcdist.lt.deltaLat,SNOWFALL(j,i,:,:),SNOWFALL@_FillValue)
-      SNOWFALL(j,i,:,:)=SNOWFALL(j,i,:,:)*6*ms_to_inhr
-    end if
-  end do
-end do
-
-CUM_SNOWFALL=dim_sum_n_Wrap(SNOWFALL,1)
+if (AGGRO_OPERATOR .eq. "sum") then
+  CUM_SNOWFALL=dim_sum_n_Wrap(SNOWFALL,1)
+  AGGRO_OUT_NAME="SUM_"+VARNAME
+else if (AGGRO_OPERATOR .eq. "avg") then
+  CUM_SNOWFALL=dim_avg_n_Wrap(SNOWFALL,1)
+  AGGRO_OUT_NAME="AVG_"+VARNAME
+else if (AGGRO_OPERATOR .eq. "min") then
+  CUM_SNOWFALL=dim_min_n_Wrap(SNOWFALL,1)
+  AGGRO_OUT_NAME="MIN_"+VARNAME
+else if (AGGRO_OPERATOR .eq. "max") then
+  CUM_SNOWFALL=dim_max_n_Wrap(SNOWFALL,1)
+  AGGRO_OUT_NAME="MAX_"+VARNAME
+else
+  print("invalid aggregator operator, exiting...")
+  exit
+end if
+end if
+end if
+end if
 
 wallClockElapseTime(wcStrtExtract, "Time to extract all snowfall events", 0)
 
-; WRITE OUTPUT FILE
+;-------------write output file------------------------------
 
 wcStrtWriteout     = systemfunc("date")
 
@@ -185,14 +152,29 @@ outFile=outDir+"/"+outFileName
 
 print("writing:   "+outFile)
 
-system("mkdir -p "+outDir)   ; remove any pre-existing file
-system("/bin/rm -f "+outFile)   ; remove any pre-existing file
-ncdf = addfile(outFile,"c")  ; open output netCDF file
+system("mkdir -p "+outDir)
+if (forceDeleteOutput) then
+  print("Force deleting any existing file...")
+  system("/bin/rm -f "+outFile)
+  fileMode="c"
+else ; check if file exists, if does, add as read, if not, create
+  if (fileexists(outFile)) then
+    print("File exists, appending...")
+    fileMode="w"
+  else
+    print("File doesn't exist, creating...")
+    fileMode="c"
+  end if
+end if
 
-fAtt               = True            ; assign file attributes
-fAtt@Conventions   = "None"
-fAtt@creation_date = systemfunc ("date")
-fileattdef( ncdf, fAtt )            ; copy file attributes
+ncdf = addfile(outFile,fileMode)
+
+if (fileMode .eq. "c")
+  fAtt               = True            ; assign file attributes
+  fAtt@Conventions   = "None"
+  fAtt@creation_date = systemfunc ("date")
+  fileattdef( ncdf, fAtt )            ; copy file attributes
+end if
 
 ; print 1-D vars
 ncdf->sttime=sttime
@@ -200,11 +182,11 @@ ncdf->entime=entime
 ncdf->durtime=durtime
 
 ; print 2-D vars
-ncdf->CUM_SNOWFALL = CUM_SNOWFALL(:,{minLatOut:maxLatOut},{minLonOut:maxLonOut})
+ncdf->$AGGRO_OUT_NAME$ = CUM_SNOWFALL(:,{minLatOut:maxLatOut},{minLonOut:maxLonOut})
 
 ; print 3-D vars
 if (doTimeSeries) then
-  ncdf->SNOWFALL = SNOWFALL(:,:,{minLatOut:maxLatOut},{minLonOut:maxLonOut})
+  ncdf->$VARNAME$ = SNOWFALL(:,:,{minLatOut:maxLatOut},{minLonOut:maxLonOut})
 end if
 
 wallClockElapseTime(wcStrtWriteout, "Time to write output", 0)
