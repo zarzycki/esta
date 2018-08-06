@@ -1,3 +1,5 @@
+1out
+commands.*
 traj/
 population.nc
 *.out
