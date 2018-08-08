@@ -47,7 +47,7 @@ program pres_temp_4D_rd
 !! MP120A = 40962
 !! MP15A-120A = 195266
   integer, parameter :: NDIMS = 2, NRECS = 120
-  integer, parameter :: NLEVS = 32, NLATS = 40962 
+  integer, parameter :: NLEVS = 32, NLATS = 195266
   character (len = *), parameter :: LEV_NAME = "lev"
   character (len = *), parameter :: LAT_NAME = "ncol"
   character (len = *), parameter :: REC_NAME = "time"
@@ -100,9 +100,9 @@ program pres_temp_4D_rd
   real :: temp_in(NLATS,NLEVS,NRECS)
   real :: prect_in(NLATS,NRECS)
   real :: ps_in(NLATS,NRECS)
-  real :: u(NLATS,NLEVS,NRECS)
-  real :: v(NLATS,NLEVS,NRECS)
-  real :: q(NLATS,NLEVS,NRECS)
+  !real :: u(NLATS,NLEVS,NRECS)
+  !real :: v(NLATS,NLEVS,NRECS)
+  !real :: q(NLATS,NLEVS,NRECS)
   real :: z3(NLATS,NLEVS,NRECS)
   
   real :: prect_snow(NLATS,NRECS)
@@ -112,12 +112,12 @@ program pres_temp_4D_rd
   real :: prect_mix(NLATS,NRECS)
   real :: psgx(NLATS,NRECS)
   real :: psgy(NLATS,NRECS)
-  real :: vort(NLATS,NLEVS,NRECS)
-  real :: div(NLATS,NLEVS,NRECS)
-  real :: omega(NLATS,NLEVS,NRECS)
-  real :: relhum(NLATS,NLEVS,NRECS)
+  !real :: vort(NLATS,NLEVS,NRECS)
+  !real :: div(NLATS,NLEVS,NRECS)
+  !real :: omega(NLATS,NLEVS,NRECS)
+  !real :: relhum(NLATS,NLEVS,NRECS)
 
-  real :: snowratio(NLATS,NRECS)
+  !real :: snowratio(NLATS,NRECS)
   real :: snowfallrate(NLATS,NRECS)
 
   real :: pdel(NLATS,NLEVS,NRECS)
@@ -165,11 +165,11 @@ program pres_temp_4D_rd
   TFILENAME = trim(""//trim(indir)//"")
   print *,TFILENAME
 
-  UFILENAME = trim(""//trim(indir)//"")
-
-  VFILENAME = trim(""//trim(indir)//"")
-
-  QFILENAME = trim(""//trim(indir)//"")
+!   UFILENAME = trim(""//trim(indir)//"")
+! 
+!   VFILENAME = trim(""//trim(indir)//"")
+! 
+!   QFILENAME = trim(""//trim(indir)//"")
 
   ZFILENAME = trim(""//trim(indir)//"")
 
@@ -181,9 +181,9 @@ program pres_temp_4D_rd
 
   ! Open the file. 
   call check( nf90_open(TFILENAME, nf90_nowrite, t_id) )
-  call check( nf90_open(QFILENAME, nf90_nowrite, q_id) )
-  call check( nf90_open(UFILENAME, nf90_nowrite, u_id) )
-  call check( nf90_open(VFILENAME, nf90_nowrite, v_id) )
+!   call check( nf90_open(QFILENAME, nf90_nowrite, q_id) )
+!   call check( nf90_open(UFILENAME, nf90_nowrite, u_id) )
+!   call check( nf90_open(VFILENAME, nf90_nowrite, v_id) )
   call check( nf90_open(ZFILENAME, nf90_nowrite, z_id) )
   call check( nf90_open(PRECTFILENAME, nf90_nowrite, prect_id) )
   call check( nf90_open(PSFILENAME, nf90_nowrite, ps_id) )
@@ -212,9 +212,9 @@ program pres_temp_4D_rd
   call check( nf90_inq_varid(prect_id, "PRECT", prect_varid  ))
   call check( nf90_inq_varid(ps_id, "PS",    ps_varid ))
   call check( nf90_inq_varid(t_id, "T",     temp_varid) )
-  call check( nf90_inq_varid(u_id, "U",     u_varid) )
-  call check( nf90_inq_varid(v_id, "V",     v_varid) )
-  call check( nf90_inq_varid(q_id, "Q",     q_varid) )
+!   call check( nf90_inq_varid(u_id, "U",     u_varid) )
+!   call check( nf90_inq_varid(v_id, "V",     v_varid) )
+!   call check( nf90_inq_varid(q_id, "Q",     q_varid) )
   call check( nf90_inq_varid(z_id, "Z3",     z3_varid) )
   call check( nf90_inq_varid(t_id, "PRESSURE",     pm_varid) )
   call check( nf90_inq_varid(t_id, "PRESSUREi",    pi_varid) )
@@ -228,9 +228,9 @@ program pres_temp_4D_rd
   call check( nf90_get_var(prect_id, prect_varid, prect_in ) )
   call check( nf90_get_var(ps_id, ps_varid,    ps_in ) )
   call check( nf90_get_var(t_id, temp_varid,  temp_in) )
-  call check( nf90_get_var(u_id, u_varid,     u) )
-  call check( nf90_get_var(v_id, v_varid,     v) )
-  call check( nf90_get_var(q_id, q_varid,     q) )
+  !call check( nf90_get_var(u_id, u_varid,     u) )
+  !call check( nf90_get_var(v_id, v_varid,     v) )
+  !call check( nf90_get_var(q_id, q_varid,     q) )
   call check( nf90_get_var(z_id, z3_varid,     z3) )
   call check( nf90_get_var(t_id, pm_varid,     pmid) )
   call check( nf90_get_var(t_id, pi_varid,     pint) )
@@ -240,9 +240,9 @@ program pres_temp_4D_rd
   ! Close the file. This frees up any internal netCDF resources
   ! associated with the file.
   call check( nf90_close(t_id) )
-  call check( nf90_close(u_id) )
-  call check( nf90_close(v_id) )
-  call check( nf90_close(q_id) )
+!   call check( nf90_close(u_id) )
+!   call check( nf90_close(v_id) )
+!   call check( nf90_close(q_id) )
   call check( nf90_close(z_id) )
   call check( nf90_close(prect_id) )
   call check( nf90_close(ps_id) )
@@ -257,7 +257,7 @@ program pres_temp_4D_rd
 
   ptype = 0
   ptypecz = 0
-  omega = 0
+  !omega = 0
   pdel = 0
   logps = LOG(ps_in)
   !call bourgouin(hyam,hyai,hyam,hybi,ptype)
@@ -345,9 +345,9 @@ print *,'... ptype calcs complete'
   
 
   ! init arrays to zero
-  vort = 0
-  div = 0
-  snowratio = 0
+  !vort = 0
+  !div = 0
+  !snowratio = 0
 
 !>   ! Calculate vorticity and divergence
 !> print *,'Starting VORT/DIV calc...'
