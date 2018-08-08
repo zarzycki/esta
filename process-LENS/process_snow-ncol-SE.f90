@@ -29,8 +29,9 @@ program pres_temp_4D_rd
 	end interface
 
 
-  CHARACTER(len=256) :: ensmem, unitstring, timeperstring, indir, outdir
-  
+  CHARACTER(len=256) :: unitstring, timeperstring, indir, outdir
+  CHARACTER(len=1) :: ensmem
+
   ! This is the name of the data file we will read.
   character (len = 256) :: TFILENAME, UFILENAME, VFILENAME, QFILENAME, ZFILENAME
   character (len = 256) :: PSFILENAME, PRECTFILENAME
@@ -71,6 +72,10 @@ program pres_temp_4D_rd
   integer :: i,j,k,z
   integer :: IER, IOPT
 
+  ! variables for playing with weightings of profiles +/- 6 hours.
+  integer :: HOPT
+  real :: W1, W2
+
   ! random seed for random number gen
   integer :: rdseed
 
@@ -95,9 +100,9 @@ program pres_temp_4D_rd
   real :: temp_in(NLATS,NLEVS,NRECS)
   real :: prect_in(NLATS,NRECS)
   real :: ps_in(NLATS,NRECS)
-  real :: u(NLATS,NLEVS,NRECS)
-  real :: v(NLATS,NLEVS,NRECS)
-  real :: q(NLATS,NLEVS,NRECS)
+  !real :: u(NLATS,NLEVS,NRECS)
+  !real :: v(NLATS,NLEVS,NRECS)
+  !real :: q(NLATS,NLEVS,NRECS)
   real :: z3(NLATS,NLEVS,NRECS)
   
   real :: prect_snow(NLATS,NRECS)
@@ -107,12 +112,12 @@ program pres_temp_4D_rd
   real :: prect_mix(NLATS,NRECS)
   real :: psgx(NLATS,NRECS)
   real :: psgy(NLATS,NRECS)
-  real :: vort(NLATS,NLEVS,NRECS)
-  real :: div(NLATS,NLEVS,NRECS)
-  real :: omega(NLATS,NLEVS,NRECS)
-  real :: relhum(NLATS,NLEVS,NRECS)
+  !real :: vort(NLATS,NLEVS,NRECS)
+  !real :: div(NLATS,NLEVS,NRECS)
+  !real :: omega(NLATS,NLEVS,NRECS)
+  !real :: relhum(NLATS,NLEVS,NRECS)
 
-  real :: snowratio(NLATS,NRECS)
+  !real :: snowratio(NLATS,NRECS)
   real :: snowfallrate(NLATS,NRECS)
 
   real :: pdel(NLATS,NLEVS,NRECS)
@@ -144,21 +149,27 @@ program pres_temp_4D_rd
 
   character (len = 256) :: FILE_NAME
 
+  integer :: stat
+
   ! Get command line arguments and set filenames
   CALL getarg(1, indir)
   CALL getarg(2, outdir)
+  CALL getarg(3, ensmem)
   !print *,'ensmem: ',ensmem,'unitstring: ',unitstring
   print *,'indir: ',indir
   print *,'outdir: ',outdir
+  print *,'option: ',ensmem
+  read(ensmem,*,IOSTAT=stat) HOPT
+  print *, HOPT
 
   TFILENAME = trim(""//trim(indir)//"")
   print *,TFILENAME
 
-  UFILENAME = trim(""//trim(indir)//"")
-
-  VFILENAME = trim(""//trim(indir)//"")
-
-  QFILENAME = trim(""//trim(indir)//"")
+!   UFILENAME = trim(""//trim(indir)//"")
+! 
+!   VFILENAME = trim(""//trim(indir)//"")
+! 
+!   QFILENAME = trim(""//trim(indir)//"")
 
   ZFILENAME = trim(""//trim(indir)//"")
 
@@ -170,9 +181,9 @@ program pres_temp_4D_rd
 
   ! Open the file. 
   call check( nf90_open(TFILENAME, nf90_nowrite, t_id) )
-  call check( nf90_open(QFILENAME, nf90_nowrite, q_id) )
-  call check( nf90_open(UFILENAME, nf90_nowrite, u_id) )
-  call check( nf90_open(VFILENAME, nf90_nowrite, v_id) )
+!   call check( nf90_open(QFILENAME, nf90_nowrite, q_id) )
+!   call check( nf90_open(UFILENAME, nf90_nowrite, u_id) )
+!   call check( nf90_open(VFILENAME, nf90_nowrite, v_id) )
   call check( nf90_open(ZFILENAME, nf90_nowrite, z_id) )
   call check( nf90_open(PRECTFILENAME, nf90_nowrite, prect_id) )
   call check( nf90_open(PSFILENAME, nf90_nowrite, ps_id) )
@@ -207,9 +218,9 @@ program pres_temp_4D_rd
   call check( nf90_inq_varid(prect_id, "PRECT", prect_varid  ))
   call check( nf90_inq_varid(ps_id, "PS",    ps_varid ))
   call check( nf90_inq_varid(t_id, "T",     temp_varid) )
-  call check( nf90_inq_varid(u_id, "U",     u_varid) )
-  call check( nf90_inq_varid(v_id, "V",     v_varid) )
-  call check( nf90_inq_varid(q_id, "Q",     q_varid) )
+!   call check( nf90_inq_varid(u_id, "U",     u_varid) )
+!   call check( nf90_inq_varid(v_id, "V",     v_varid) )
+!   call check( nf90_inq_varid(q_id, "Q",     q_varid) )
   call check( nf90_inq_varid(z_id, "Z3",     z3_varid) )
 
   print *,'6'
@@ -226,9 +237,9 @@ program pres_temp_4D_rd
   call check( nf90_get_var(prect_id, prect_varid, prect_in ) )
   call check( nf90_get_var(ps_id, ps_varid,    ps_in ) )
   call check( nf90_get_var(t_id, temp_varid,  temp_in) )
-  call check( nf90_get_var(u_id, u_varid,     u) )
-  call check( nf90_get_var(v_id, v_varid,     v) )
-  call check( nf90_get_var(q_id, q_varid,     q) )
+  !call check( nf90_get_var(u_id, u_varid,     u) )
+  !call check( nf90_get_var(v_id, v_varid,     v) )
+  !call check( nf90_get_var(q_id, q_varid,     q) )
   call check( nf90_get_var(z_id, z3_varid,     z3) )
 
   print *,'8'
@@ -236,9 +247,9 @@ program pres_temp_4D_rd
   ! Close the file. This frees up any internal netCDF resources
   ! associated with the file.
   call check( nf90_close(t_id) )
-  call check( nf90_close(u_id) )
-  call check( nf90_close(v_id) )
-  call check( nf90_close(q_id) )
+!   call check( nf90_close(u_id) )
+!   call check( nf90_close(v_id) )
+!   call check( nf90_close(q_id) )
   call check( nf90_close(z_id) )
   call check( nf90_close(prect_id) )
   call check( nf90_close(ps_id) )
@@ -253,7 +264,7 @@ program pres_temp_4D_rd
 
   ptype = 0
   ptypecz = 0
-  omega = 0
+  !omega = 0
   pdel = 0
   pmid = 0
   logps = LOG(ps_in)
@@ -303,12 +314,29 @@ print *,'Starting ptype calculations...'
         !IF (mod(i,100) .EQ. 0) print *,i,' of ',NLATS
           z=NRECS-j+1
           rdseed = i*z
-!            IF (z .NE. 1) THEN
-!              temp_in(i,:,z)=(2*temp_in(i,:,z)+temp_in(i,:,z-1))/3.
-!              pmid(i,:,z)=(2*pmid(i,:,z)+pmid(i,:,z-1))/3.
-!              pint(i,:,z)=(2*pint(i,:,z)+pint(i,:,z-1))/3.
-!              zint(i,:,z)=(2*zint(i,:,z)+zint(i,:,z-1))/3.
-!            END IF
+            IF (HOPT .GT. 0) THEN
+              IF (HOPT .EQ. 1) THEN     
+                W1 = 1.
+                W2 = 1.
+              ELSE IF (HOPT .EQ. 2) THEN
+                W1 = 2.
+                W2 = 1.
+              ELSE IF (HOPT .EQ. 3) THEN
+                W1 = 1.
+                W2 = 2.
+              END IF 
+              IF (j .EQ. 1 .AND. i .EQ. 1) THEN
+                print *,'Doing weighting!'
+                print *,'W1: ',W1
+                print *,'W2: ',W2
+              END IF
+              IF (z .NE. 1) THEN
+                temp_in(i,:,z)=(W1*temp_in(i,:,z)+W2*temp_in(i,:,z-1))/(W1+W2)
+                pmid(i,:,z)=(W1*pmid(i,:,z)+W2*pmid(i,:,z-1))/(W1+W2)
+                pint(i,:,z)=(W1*pint(i,:,z)+W2*pint(i,:,z-1))/(W1+W2)
+                zint(i,:,z)=(W1*zint(i,:,z)+W2*zint(i,:,z-1))/(W1+W2)
+              END IF
+            END IF
 
           call bourgouin(rdseed,pmid(i,:,z),pint(i,:,z),temp_in(i,:,z),ptypecz(i,z))
           call calwxt_bourg(rdseed,32,33,temp_in(i,:,z),pmid(i,:,z),pint(i,:,z),zint(i,:,z),ptype(i,z))
@@ -330,9 +358,9 @@ print *,'... ptype calcs complete'
   
 
   ! init arrays to zero
-  vort = 0
-  div = 0
-  snowratio = 0
+  !vort = 0
+  !div = 0
+  !snowratio = 0
 
 !>   ! Calculate vorticity and divergence
 !> print *,'Starting VORT/DIV calc...'
