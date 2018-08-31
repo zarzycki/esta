@@ -58,7 +58,7 @@ ms_to_inhr=141732.
 ;doRegionalOutput=False
 ;forceDeleteOutput=True
 
-list_of_files="/glade/u/home/zarzycki/scratch/ASD/snow-regrid/*h8*remap.nc"
+list_of_files="/glade/u/home/zarzycki/scratch/ASD/snow-regrid/*h8.*remap.nc"
 VARNAME="PRECBSN"
 traj_filename="./traj.filt"
 outDir="/glade/scratch/zarzycki/"
@@ -66,7 +66,7 @@ outFileName="SNOWTEST.nc"
 AGGRO_OPERATOR="sum"  ; sum, avg, min, max
 offset=6*ms_to_inhr
 deltaDeg=15.0
-doTimeSeries=True
+doTimeSeries=False
 doRegionalOutput=True
 forceDeleteOutput=True
 ; NL VARS +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -133,7 +133,7 @@ delete(retlist)
 
 wcStrtExtract     = systemfunc("date")
 
-retlist=setupArrays(nstorms,ntimes,lat,lon)
+retlist=setupArrays(1,ntimes,lat,lon)
 lat2D=retlist[0]
 lon2D=retlist[1]
 SNOWFALL=retlist[2]
@@ -146,7 +146,10 @@ list_vars()
 
 ;-------------extract data from files------------------------------
 
-SNOWFALL=loopAndExtract(SNOWFALL,VARNAME,lat2D,lon2D,deltaDeg,nstorms,ntimes,sttime,entime,durtime,traj_lon,traj_lat,traj_yyyy,traj_mm,traj_dd,traj_hh,timeArr,timeunits,opt,latBounds,offset)
+do ii = 0,nstorms-1
+
+SNOWFALL=SNOWFALL@_FillValue
+SNOWFALL=loopAndExtractSingle(SNOWFALL,VARNAME,lat2D,lon2D,deltaDeg,ii,ntimes,sttime,entime,durtime,traj_lon,traj_lat,traj_yyyy,traj_mm,traj_dd,traj_hh,timeArr,timeunits,opt,latBounds,offset)
 
 ;-------------do summation------------------------------
 
@@ -178,7 +181,7 @@ wcStrtWriteout     = systemfunc("date")
 
 setfileoption("nc","Format","LargeFile")
 
-outFile=outDir+"/"+outFileName
+outFile=outDir+"/"+outFileName+"_"+sprinti("%0.5i", ii)+".nc"
 
 print("writing:   "+outFile)
 
@@ -218,6 +221,10 @@ ncdf->$AGGRO_OUT_NAME$ = CUM_SNOWFALL(:,{minLatOut:maxLatOut},{minLonOut:maxLonO
 if (doTimeSeries) then
   ncdf->$VARNAME$ = SNOWFALL(:,:,{minLatOut:maxLatOut},{minLonOut:maxLonOut})
 end if
+
+end do
+
+
 
 wallClockElapseTime(wcStrtWriteout, "Time to write output", 0)
 wallClockElapseTime(wcStrt, "Total run time", 0)

@@ -11,8 +11,8 @@ load "functions.ncl"
 ;========================================================
 begin
 
-infile="trajectories.txt.CORI.VR28.NATL.WAT.CAM5.4CLM5.0.dtime900.003"
-outfile="traj"
+infile="trajectories.txt.MP15A-120A-US-EXP213"
+outfile="traj.filt"
 
 system("rm "+outfile)
 

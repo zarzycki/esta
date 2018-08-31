@@ -46,7 +46,9 @@ program pres_temp_4D_rd
 !! NE0CONUS = 174098
 !! MP120A = 40962
 !! MP15A-120A = 195266
-  integer, parameter :: NDIMS = 2, NRECS = 120
+
+!! Normally 120 recs, 81 on end of "cut" for ASD
+  integer, parameter :: NDIMS = 2, NRECS = 81
   integer, parameter :: NLEVS = 32, NLATS = 195266
   character (len = *), parameter :: LEV_NAME = "lev"
   character (len = *), parameter :: LAT_NAME = "ncol"

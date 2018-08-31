@@ -11,13 +11,14 @@
 #PBS -l select=1:ncpus=36:mem=109GB
 ################################################################
 
-NUMCORES=6
+NUMCORES=18  # 6 needed for High-res, 18 needed for low res
 TIMESTAMP=`date +%s%N`
 COMMANDFILE=commands.${TIMESTAMP}.txt
 
-#CAMDIR=/glade/scratch/zarzycki/ASD/archive/f.asd2017.cesm20b05.FAMIPC6CLM5.mp120a_g16.exp214/atm/hist/
-#CAMDIR=/glade/u/home/zarzycki/acgd0005/archive/f.asd2017.cesm20b05.FAMIPC6CLM5.ne30_g16.exp212/atm/hist/
-CAMDIR=/glade/u/home/zarzycki/acgd0005/archive/f.asd2017.cesm20b05.FAMIPC6CLM5.mp15a-120a-US_t12.exp213/atm/hist/
+#CAMDIR=/glade/u/home/zarzycki/acgd0005/archive/f.asd2017.cesm20b05.FAMIPC6CLM5.mp120a_g16.exp214/atm/hist/
+CAMDIR=/glade/u/home/zarzycki/acgd0005/archive/f.asd2017.cesm20b05.FAMIPC6CLM5.ne30_g16.exp212/atm/hist/
+#CAMDIR=/glade/u/home/zarzycki/acgd0005/archive/f.asd2017.cesm20b05.FAMIPC6CLM5.ne0conus30x8_t12.exp211/atm/hist/
+#CAMDIR=/glade/u/home/zarzycki/acgd0005/archive/f.asd2017.cesm20b05.FAMIPC6CLM5.mp15a-120a-US_t12.exp213/atm/hist/
 OUTDIR=/glade/scratch/zarzycki/TEST-SNOW/
 FILES=`ls ${CAMDIR}/*.cam.h2.*.nc`
 for f in $FILES
@@ -41,6 +42,8 @@ for f in $FILES
   LINECOMMAND="ncks -v PRECBSN,PRECBRA,PRECBIP,PRECBFZ,PRECT $f ${OUTDIR}/${OUTFILE}"
 #  echo ${LINECOMMAND} >> ${COMMANDFILE}
 done
+
+exit
 
 #### Use this for Cheyenne batch jobs
 parallel --jobs ${NUMCORES} -u --sshloginfile $PBS_NODEFILE --workdir $PWD < ${COMMANDFILE}
