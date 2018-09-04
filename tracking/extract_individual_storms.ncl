@@ -34,8 +34,9 @@ if (any(isvar((/"pslFileFull","PSLVARNAME"/)))) then
 end if
 
 ; How big of a window around track lat/lon do we want to take?
-deltaLat=15.0
-deltaLon=15.0
+;deltaLat=10.0
+print("read in deltaLat: "+deltaLat+" degrees.")
+deltaLon=deltaLat
 
 doTimeSeries=True
 doRegionalOutput=True

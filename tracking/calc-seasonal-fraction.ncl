@@ -20,8 +20,9 @@ wcStrt     = systemfunc("date")
 ;outFileName="test.nc"
 
 ; How big of a window around track lat/lon do we want to take?
-deltaLat=15.0
-deltaLon=15.0
+;deltaLat=12.0
+print("read in deltaLat: "+deltaLat+" degrees.")
+deltaLon=deltaLat
 
 doTimeSeries=True
 doRegionalOutput=True
@@ -99,6 +100,8 @@ FULLPREC=tofloat(FULLPREC_DOUBLE)
 copy_VarMeta(FULLPREC_DOUBLE,FULLPREC)
 delete(FULLPREC_DOUBLE)
 STORMPREC=FULLPREC
+STORMHITS=FULLPREC
+STORMHITS=0.0
 printVarSummary(FULLPREC)
 
 opt=0   ; cd_inv_calendar
@@ -150,6 +153,7 @@ if (.not.ismissing(traj_lon(j,i))) then
   if ( tracktime .le. maxFileTime .and. tracktime .ge. minFileTime ) then
     print(trackindex+"")
     STORMPREC(trackindex,:,:)=where(gcdist.ge.deltaLat,FULLPREC(trackindex,:,:),0.0)
+    STORMHITS(trackindex,:,:)=where(gcdist.lt.deltaLat,STORMHITS(trackindex,:,:)+1,STORMHITS(trackindex,:,:))
   end if   ; check to see if tracktime on file
   
 end if
@@ -157,8 +161,13 @@ end if
 end do
 end do
 
+DOUBLESNOW=FULLPREC
+DOUBLESNOW=where(STORMHITS.gt.1.5,FULLPREC,0.0)
+
+
 NONSTORMSUM=dim_sum_n_Wrap(STORMPREC,0)
 TOTALSUM=dim_sum_n_Wrap(FULLPREC,0)
+DOUBLESUM=dim_sum_n_Wrap(DOUBLESNOW,0)
 STORMSUM=NONSTORMSUM
 STORMSUM=TOTALSUM-NONSTORMSUM
 TOTALSUM=where(TOTALSUM.lt.1e-8,TOTALSUM@_FillValue,TOTALSUM)
@@ -166,6 +175,8 @@ TOTALSUM=where(TOTALSUM.lt.1e-8,TOTALSUM@_FillValue,TOTALSUM)
 STORMFRAC = TOTALSUM
 STORMFRAC = STORMSUM / TOTALSUM
 
+DOUBLEFRAC = TOTALSUM
+DOUBLEFRAC = DOUBLESUM / TOTALSUM
 
 wallClockElapseTime(wcStrtExtract, "Time to extract all snowfall events", 0)
 
@@ -251,8 +262,10 @@ ncdf->durtime=durtime
 
 ; print 2-D vars
 ;ncdf->STORMPREC = STORMPREC(:,{minLatOut:maxLatOut},{minLonOut:maxLonOut})
+ncdf->STORMHITS = STORMHITS(:,{minLatOut:maxLatOut},{minLonOut:maxLonOut})
 ;ncdf->FULLPREC = FULLPREC(:,{minLatOut:maxLatOut},{minLonOut:maxLonOut})
 ncdf->STORMFRAC = STORMFRAC({minLatOut:maxLatOut},{minLonOut:maxLonOut})
+ncdf->DOUBLEFRAC = DOUBLEFRAC({minLatOut:maxLatOut},{minLonOut:maxLonOut})
 
 wallClockElapseTime(wcStrtWriteout, "Time to write output", 0)
 wallClockElapseTime(wcStrt, "Total run time", 0)

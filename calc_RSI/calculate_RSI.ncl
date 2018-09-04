@@ -193,6 +193,7 @@ system("echo "+quote +stormFilePath+delim+ensmember+delim+sprinti("%0.5i", storm
 ;5	18.0+	Extreme
 
 
+if (0 .eq. 1) then
 ;******************************************************
 ; create snowfall map
 ;******************************************************
@@ -232,5 +233,6 @@ res@mpOutlineSpecifiers         = (/"Land"/)
 ;res@mpMaskOutlineSpecifiers     = (/"water"/)
 
 map = gsn_csm_contour_map_ce(wks,SNOW_MASK(:,:),res)
+end if
 
 end

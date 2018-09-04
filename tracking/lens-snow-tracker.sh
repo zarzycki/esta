@@ -11,24 +11,37 @@
 date
 
 NUMID=$1
+RUNDATES=$2
+SWE=$3
+THRESH=$4
+DELTALAT=$5
+
+#./lens-snow-tracker.sh 001 "2071010100Z-2080123118Z" 12 5e-9 30
 
 DO_TEMPEST=false           # Do we do Lagrangian/Tempest trajectories?
 DO_CONNTRACK=false        # Do we do "connected" trajectories?
-PROCESS_TEMPEST=false      # Do we extract/calc RSI for Lagrangian/Tempest trajectories?
-PROCESS_CONNTRACK=true   # Do we extract/calc RSI for "connected" trajectories?
-SEASONFRAC_TEMPEST=false
+SEASONFRAC_TEMPEST=true
 SEASONFRAC_CONNTRACK=false
+PROCESS_TEMPEST=true     # Do we extract/calc RSI for Lagrangian/Tempest trajectories?
+PROCESS_CONNTRACK=false  # Do we extract/calc RSI for "connected" trajectories?
 
-SWE="12"                   # snow water equivalent (12 = default, 9-13 is probably acceptable range)
-THRESH="5e-9"              # Connected trajectory threshold (area average precipitation)
+#SWE="12"                   # snow water equivalent (12 = default, 9-13 is probably acceptable range)
+#THRESH="5e-9"              # Connected trajectory threshold (area average precipitation)
+#DELTALAT=12
 
 MODEL="LENS"
 #RUNDATES="1990010100Z-2005123118Z"
 #RUNDATES="2026010100Z-2035123118Z"
-RUNDATES="2071010100Z-2080123118Z"
-#RUNCONFIG="B20TRC5CNBDRD"
-RUNCONFIG="BRCP85C5CNBDRD"
-CONFIG=${THRESH}"_"${SWE}
+#RUNDATES="2071010100Z-2080123118Z"
+
+# Logic for LENS members done at U Toronto
+if [ ${RUNDATES} == "1990010100Z-2005123118Z" ]; then
+  RUNCONFIG="B20TRC5CNBDRD"
+else
+  RUNCONFIG="BRCP85C5CNBDRD"
+fi
+
+CONFIG=${THRESH}"_"${SWE}"_"${DELTALAT}
 
 # Logic for LENS members done at U Toronto
 if   [ ${NUMID} == '036' ]; then
@@ -56,8 +69,8 @@ RSISNOWFILE="RSI.SNOW."${DESCSTR}".csv"
 RSIPRECFILE="RSI.PREC."${DESCSTR}".csv"
 
 NCLPATH=/glade/u/home/zarzycki/snow-tracking/tracking/
-RSIOUTDIR=/glade/scratch/zarzycki/LES-snow/stats/
-EXTRACTOUTDIR=/glade/scratch/zarzycki/LES-snow/storm-files/
+RSIOUTDIR=/glade/scratch/zarzycki/LES-snow/stats/${CONFIG}/
+EXTRACTOUTDIR=/glade/scratch/zarzycki/LES-snow/storm-files/${CONFIG}/
 
 PRECTFILE="/glade/p_old/cesmLE/CESM-CAM5-BGC-LE/atm/proc/tseries/hourly6/PRECT/b.e11."${RUNCONFIG}".f09_g16."${NUMID}".cam.h2.PRECT."${RUNDATES}".nc"
 PRECVARNAME="PRECT"
@@ -135,7 +148,8 @@ fi
 
 if [ ${SEASONFRAC_TEMPEST} == 'true' ]; then
   OUTFRACFILE="frac.tempest."${DESCSTR}".nc"
-  (set -x; ncl ${NCLPATH}/calc-seasonal-fraction.ncl 'snowFileFull="'${SNOWFILE}'"' \
+  (set -x; ncl ${NCLPATH}/calc-seasonal-fraction.ncl deltaLat=${DELTALAT} \
+    'snowFileFull="'${SNOWFILE}'"' \
     'SNOWVARNAME="'${SNOWVARNAME}'"' \
     'prectFileFull="'${PRECTFILE}'"' \
     'traj_filename="'${TEMPESTFILE}'"' \
@@ -145,7 +159,8 @@ fi
 
 if [ ${SEASONFRAC_CONNTRACK} == 'true' ]; then
   OUTFRACFILE="frac.conntraj."${DESCSTR}".nc"
-  (set -x; ncl ${NCLPATH}/calc-seasonal-fraction.ncl 'snowFileFull="'${SNOWFILE}'"' \
+  (set -x; ncl ${NCLPATH}/calc-seasonal-fraction.ncl deltaLat=${DELTALAT} \
+    'snowFileFull="'${SNOWFILE}'"' \
     'SNOWVARNAME="'${SNOWVARNAME}'"' \
     'prectFileFull="'${PRECTFILE}'"' \
     'traj_filename="'${TRAJFILE}'"' \
@@ -159,7 +174,9 @@ if [ ${PROCESS_CONNTRACK} == 'true' ]; then
 
   starttimeextract=$(date -u +"%s")
 
-  (set -x; ncl ${NCLPATH}/extract_individual_storms.ncl 'snowFileFull="'${SNOWFILE}'"' \
+  #Note for conntrack, we just use large deltaLat since "storm center" is fixed in NEUS
+  (set -x; ncl ${NCLPATH}/extract_individual_storms.ncl deltaLat=25 \
+    'snowFileFull="'${SNOWFILE}'"' \
     'SNOWVARNAME="'${SNOWVARNAME}'"' \
     'prectFileFull="'${PRECTFILE}'"' \
     'PRECTVARNAME="'${PRECVARNAME}'"' \
@@ -172,6 +189,7 @@ if [ ${PROCESS_CONNTRACK} == 'true' ]; then
    endtimeextract=$(date -u +"%s")
    starttimeRSI=$(date -u +"%s")
 
+  mkdir -p ${RSIOUTDIR}
   RSISNOWFILES=(${RSISNOWFILE}".SNOW.conntraj.csv" ${RSISNOWFILE}".PRECT.conntraj.csv")
   SWES=(${SWE} ${SWE})
   SNOWVARNAMES=("CUM_SNOWFALL" "CUM_PRECT")
@@ -200,7 +218,8 @@ if [ ${PROCESS_TEMPEST} == 'true' ]; then
   starttimeextract=$(date -u +"%s")
   TRAJFILE=${TEMPESTFILE}
   EXTRACTOUTFILE=${EXTRACTOUTFILE}".tempest.nc"
-  ncl ${NCLPATH}/extract_individual_storms.ncl 'snowFileFull="'${SNOWFILE}'"' \
+  ncl ${NCLPATH}/extract_individual_storms.ncl deltaLat=${DELTALAT} \
+    'snowFileFull="'${SNOWFILE}'"' \
     'SNOWVARNAME="'${SNOWVARNAME}'"' \
     'prectFileFull="'${PRECTFILE}'"' \
     'PRECTVARNAME="'${PRECVARNAME}'"' \
@@ -212,6 +231,7 @@ if [ ${PROCESS_TEMPEST} == 'true' ]; then
   endtimeextract=$(date -u +"%s")
 
   starttimeRSI=$(date -u +"%s")
+  mkdir -p ${RSIOUTDIR}
   RSISNOWFILES=(${RSISNOWFILE}".SNOW.tempest.csv" ${RSISNOWFILE}".PRECT.tempest.csv")
   SWES=(${SWE} ${SWE})
   SNOWVARNAMES=("CUM_SNOWFALL" "CUM_PRECT")
@@ -243,4 +263,4 @@ if [ -z ${starttimeRSI+x} ]; then tottimeRSI=0; else tottimeRSI=$(($endtimeRSI-$
 endtime=$(date -u +"%s")
 tottime=$(($endtime-$starttime))
 
-printf "${RUNDATES:0:4} ${NUMID} ${tottimetrack} ${tottimefilter} ${tottimeextract} ${tottimeRSI} ${tottime}\n" >> timing.txt
+printf "${RUNDATES:0:4} ${CONFIG} ${NUMID} ${tottimetrack} ${tottimefilter} ${tottimeextract} ${tottimeRSI} ${tottime}\n" >> timing.txt
