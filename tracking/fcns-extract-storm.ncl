@@ -1,13 +1,16 @@
 function buildTimeLookup(filelist)
 ; Pass in a filelist of CAM files, build a lookup table for filename and time indices
-local ftmp, nfiles, nftimes, timeArr, listArr, ii
+local ftmp, nfiles, nftimes, timeArr, listArr, ii, maxtimes
 begin
   ; Here we build a "lookup" table to find what times are on what files...
   ; get list of h3 files
-  ftmp = addfile(filelist(0),"r")
   nfiles = dimsizes(filelist)
-  nftimes = dimsizes(ftmp->time)
-  timeArr = new((/nfiles,nftimes/),typeof(ftmp->time))
+  maxtimes=-1
+  do ii = 0,nfiles-1
+    ftmp = addfile(filelist(ii),"r")
+    maxtimes = max((/maxtimes,getfilevardimsizes(ftmp,"time")/))
+  end do
+  timeArr = new((/nfiles,maxtimes/),typeof(ftmp->time))
   listArr = new((/nfiles/),"string")
   do ii = 0,nfiles-1
     print("loading time for file #"+ii+" of "+(nfiles-1)+"  "+filelist(ii))
@@ -18,7 +21,6 @@ begin
   end do
   timeArr!0="files"
   timeArr&files=listArr
-
   timeunits=ftmp->time@units
   opt=0
   opt@calendar=ftmp->time@calendar

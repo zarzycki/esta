@@ -21,8 +21,9 @@ COMMANDFILE=commands.${TIMESTAMP}.txt
 rm ${COMMANDFILE}
 
 declare -a RUNDATES_S=("1990010100Z-2005123118Z" "2026010100Z-2035123118Z" "2071010100Z-2080123118Z")
-declare -a LWE_S=("10" "11" "12")
-declare -a DELTALAT_S=("30")
+#declare -a RUNDATES_S=("1990010100Z-2005123118Z")
+declare -a LWE_S=("13")
+declare -a DELTALAT_S=("15")
 # create new line in command file for 1 -> NUMCORES
 #for i in `seq 1 ${NUMTASKS}`;
 

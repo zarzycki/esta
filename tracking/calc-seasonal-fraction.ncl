@@ -68,13 +68,18 @@ storm_index=ispan(0,nstorms-1,1)
 ntimes = ndims(1)
 
 ;----------------------------------------------------------
+
+nlines=toint(systemfunc("wc -l < /glade/u/home/zarzycki/snow-tracking/tracking/reanalysis-track/filelist.SNOW.txt"))
+all_files = asciiread("/glade/u/home/zarzycki/snow-tracking/tracking/reanalysis-track/filelist.SNOW.txt",nlines,"string")
+fall = addfiles (all_files, "r")
+
+;----------------------------------------------------------
 ; set up arrays
 
 wcStrtExtract     = systemfunc("date")
 
-fileWLATLON=addfile(snowFileFull,"r")
-lat=fileWLATLON->lat({minLatOut:maxLatOut})
-lon=fileWLATLON->lon({minLonOut:maxLonOut})
+lat=fall[0]->lat({minLatOut:maxLatOut})
+lon=fall[0]->lon({minLonOut:maxLonOut})
 nlat=dimsizes(lat)
 nlon=dimsizes(lon)
 lat2D=conform_dims((/nlat,nlon/),lat,0) 
@@ -91,10 +96,10 @@ durtime!0   = "storm"
 
 PREC_FILE=addfile(snowFileFull,"r")
 
-filetime=PREC_FILE->time
+filetime=fall[:]->time
 maxFileTime=max(filetime)
 minFileTime=min(filetime)
-FULLPREC_DOUBLE=PREC_FILE->$SNOWVARNAME$(:,{minLatOut:maxLatOut},{minLonOut:maxLonOut})
+FULLPREC_DOUBLE=fall[:]->$SNOWVARNAME$(:,{minLatOut:maxLatOut},{minLonOut:maxLonOut})
 FULLPREC=tofloat(FULLPREC_DOUBLE)
 ;FULLPREC=ddd
 copy_VarMeta(FULLPREC_DOUBLE,FULLPREC)
@@ -119,7 +124,7 @@ if (.not.ismissing(traj_lon(j,i))) then
   thisYear=traj_yyyy(j,i)
   
   if (.not. isdefined("units"))
-    units=PREC_FILE->time@units
+    units=fall[0]->time@units
   end if
 
   yyyy=toint(traj_yyyy(j,i))
@@ -163,7 +168,6 @@ end do
 
 DOUBLESNOW=FULLPREC
 DOUBLESNOW=where(STORMHITS.gt.1.5,FULLPREC,0.0)
-
 
 NONSTORMSUM=dim_sum_n_Wrap(STORMPREC,0)
 TOTALSUM=dim_sum_n_Wrap(FULLPREC,0)

@@ -6,13 +6,13 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_code.ncl"
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_csm.ncl"
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/contributed.ncl"
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/shea_util.ncl"
-load "functions.ncl"
+load "/glade/u/home/zarzycki/snow-tracking/tracking/functions.ncl"
 
 ;========================================================
 begin
 
-infile="trajectories.txt.MP15A-120A-US-EXP213"
-outfile="traj.filt"
+;infile="trajectories.txt.MP15A-120A-US-EXP213"
+;outfile="traj.filt"
 
 system("rm "+outfile)
 
@@ -30,10 +30,11 @@ maxLines = -1  ; set to -1 for auto-detection
 traj_data = getTrajectories(infile,ncols,maxLines)
 
 ; need to be modified to 2,3,4,6 if using LENS/latlon data
-lon = traj_data(:,1,:)
-lat = traj_data(:,2,:)
-pres = traj_data(:,3,:)/100.
-month = toint(traj_data(:,5,:))
+lon = traj_data(:,2,:)
+lat = traj_data(:,3,:)
+pres = traj_data(:,4,:)/100.
+year = toint(traj_data(:,5,:))
+month = toint(traj_data(:,6,:))
 ndims = dimsizes(lon)
 nstorms = ndims(0)
 ntimesall = ndims(1)
@@ -49,6 +50,7 @@ do ii = 0,nstorms-1
   onedlon = lon(ii,:)
   onedlat = lat(ii,:)
   onedmonth = month(ii,:)
+  onedyear = year(ii,:)
   ntimes = num(.not.(ismissing(onedlon)))
   onedbearing = onedlon
   onedbearing(0) = onedbearing@_FillValue
@@ -69,7 +71,8 @@ do ii = 0,nstorms-1
   isStorm=where(gc1 .le. threshold .OR. gc2 .le. threshold,isStorm,isStorm@_FillValue)
   ;isStorm=where(onedbearing .ge. 0 .AND. onedbearing .le. 90 ,isStorm,isStorm@_FillValue)
 
-  if (onedmonth(0) .ge. firstmm .or. onedmonth(0) .le. lastmm)
+  ;if ((onedmonth(0) .ge. firstmm .or. onedmonth(0) .le. lastmm) .and. onedyear(0) .lt. 2000)
+  if ((onedmonth(0) .ge. firstmm .or. onedmonth(0) .le. lastmm))
     inSeason=True
   else
     inSeason=False

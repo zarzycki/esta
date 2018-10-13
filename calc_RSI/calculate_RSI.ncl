@@ -49,10 +49,10 @@ DURTIME=f->durtime(toint(stormID))
 STTIMESTR=tostring(STTIME)
 DURTIMESTR=tostring(DURTIME)
 
-SNOW=f->$SNOWVARNAME$(toint(stormID),{37:49},{-82+360.:-66+360.})
+SNOW=f->$SNOWVARNAME$(toint(stormID),{37:49},{-82.:-66.})
 
-lon=-(360.-SNOW&lon)
-SNOW&lon=lon
+;lon=-(360.-SNOW&lon)
+;SNOW&lon=lon
 
 if (isvar("SWE"))
   SNOW = SNOW*totype(SWE,typeof(SNOW))
@@ -193,7 +193,7 @@ system("echo "+quote +stormFilePath+delim+ensmember+delim+sprinti("%0.5i", storm
 ;5	18.0+	Extreme
 
 
-if (0 .eq. 1) then
+if (1 .eq. 1) then
 ;******************************************************
 ; create snowfall map
 ;******************************************************

@@ -18,8 +18,8 @@ DELTALAT=$5
 
 #./lens-snow-tracker.sh 001 "2071010100Z-2080123118Z" 12 5e-9 30
 
-DO_TEMPEST=false           # Do we do Lagrangian/Tempest trajectories?
-DO_CONNTRACK=false        # Do we do "connected" trajectories?
+DO_TEMPEST=true           # Do we do Lagrangian/Tempest trajectories?
+DO_CONNTRACK=false       # Do we do "connected" trajectories?
 SEASONFRAC_TEMPEST=true
 SEASONFRAC_CONNTRACK=false
 PROCESS_TEMPEST=true     # Do we extract/calc RSI for Lagrangian/Tempest trajectories?

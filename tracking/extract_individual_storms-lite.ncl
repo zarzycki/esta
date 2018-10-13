@@ -58,14 +58,27 @@ ms_to_inhr=141732.
 ;doRegionalOutput=False
 ;forceDeleteOutput=True
 
-list_of_files="/glade/u/home/zarzycki/scratch/ASD/snow-regrid/*h8*remap.nc"
-VARNAME="PRECBSN"
-traj_filename="./traj.filt"
+;list_of_files="/glade/u/home/zarzycki/scratch/ASD/snow-regrid/*h8*remap.nc"
+;VARNAME="PRECBSN"
+;traj_filename="./traj.filt"
+;outDir="/glade/scratch/zarzycki/"
+;outFileName="SNOWTEST.nc"
+;AGGRO_OPERATOR="sum"  ; sum, avg, min, max
+;offset=6*ms_to_inhr
+;deltaDeg=15.0
+;doTimeSeries=True
+;doRegionalOutput=True
+;forceDeleteOutput=True
+
+list_of_files=systemfunc("find /glade/u/home/zarzycki/scratch/snow/ -name *.SNOW.gridded.nc | sort -n")
+print(list_of_files)
+VARNAME="SNOW"
+traj_filename="reanalysis-track/traj/tempest.JRA.1958.001"
 outDir="/glade/scratch/zarzycki/"
 outFileName="SNOWTEST.nc"
 AGGRO_OPERATOR="sum"  ; sum, avg, min, max
-offset=6*ms_to_inhr
-deltaDeg=15.0
+offset=1.
+deltaDeg=12.0
 doTimeSeries=True
 doRegionalOutput=True
 forceDeleteOutput=True
@@ -75,10 +88,14 @@ forceDeleteOutput=True
 ;----------------Find min/max bounds-----------------------------------
 
 if (doRegionalOutput) then   ; If yes, truncation output
+  ;minLatOut=25.
+  ;maxLatOut=55.
+  ;minLonOut=265.
+  ;maxLonOut=300.
   minLatOut=25.
   maxLatOut=55.
-  minLonOut=265.
-  maxLonOut=300.
+  minLonOut=265.-360
+  maxLonOut=300.-360
 else   ; if not, just set to very large neg/pos values since NCL indexes min/max auto this way
   minLatOut=-99999.
   maxLatOut=99999.
@@ -93,17 +110,17 @@ latBounds=packLatLonBounds(minLatOut,maxLatOut,minLonOut,maxLonOut)
 ;-------------Get trajectories------------------------------
 
 thefile=traj_filename
-ncols = 8                     ; assign number of columns
+ncols = 9                     ; assign number of columns
 maxLines = -1
 traj_data = getTrajectories(thefile,ncols,maxLines)
 
-traj_lon = traj_data(:,1,:)
-traj_lat = traj_data(:,2,:)
-traj_pres = traj_data(:,3,:)/100.
-traj_yyyy = traj_data(:,4,:)
-traj_mm = traj_data(:,5,:)
-traj_dd = traj_data(:,6,:) 
-traj_hh = traj_data(:,7,:)
+traj_lon = traj_data(:,2,:)
+traj_lat = traj_data(:,3,:)
+traj_pres = traj_data(:,4,:)/100.
+traj_yyyy = traj_data(:,5,:)
+traj_mm = traj_data(:,6,:)
+traj_dd = traj_data(:,7,:) 
+traj_hh = traj_data(:,8,:)
 
 delete(traj_data)
 
@@ -116,7 +133,7 @@ ntimes = ndims(1)
 
 ; Here we build a "lookup" table to find what times are on what files...
 ; get list of h3 files
-filelist = systemfunc ("ls "+list_of_files)
+filelist = list_of_files
 timeArr=buildTimeLookup(filelist)
 
 ;-------------get relevant coords------------------------------
