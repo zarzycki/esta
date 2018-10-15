@@ -4,6 +4,5 @@ trajectories.txt*
 1out
 commands.*
 traj/
-population.nc
 *.out
 *.mod

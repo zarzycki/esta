@@ -6,8 +6,17 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_code.ncl"
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_csm.ncl"
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/contributed.ncl"
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/shea_util.ncl"
-load "~/ncl/functions/getTrajectories.ncl"
+load "~/ncl-zarzycki/functions/getTrajectories.ncl"
 load "fcns-extract-storm.ncl"
+
+ESTAPATH = getenv("ESTAPATH")
+fcntoload=ESTAPATH+"/functions/namelist_extract.ncl"
+if (fileexists(fcntoload)) then
+  loadscript(fcntoload)
+else
+  print("function "+fcntoload+" doesn't exist")
+  exit
+end if
 ;========================================================
 
 begin
@@ -21,7 +30,23 @@ pi = 3.14159265358979
 omega = 7.2921E-5
 ms_to_inhr=141732.
 
-; NL VARS +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+nlfile="nl.hyperion"
+
+list_of_files = namelist_extract( nlfile, "list_of_files", "string")
+VARNAME = namelist_extract( nlfile, "VARNAME", "string")
+traj_filename = namelist_extract( nlfile, "traj_filename", "string")
+outDir = namelist_extract( nlfile, "outDir", "string")
+outFileName = namelist_extract( nlfile, "outFileName", "string")
+AGGRO_OPERATOR = namelist_extract( nlfile, "AGGRO_OPERATOR", "string")
+
+offset = namelist_extract( nlfile, "offset", "float")
+deltaDeg = namelist_extract( nlfile, "deltaDeg", "float")
+outDir = namelist_extract( nlfile, "outDir", "string")
+
+doTimeSeries = namelist_extract( nlfile, "doTimeSeries", "logical")
+doRegionalOutput = namelist_extract( nlfile, "doRegionalOutput", "logical")
+forceDeleteOutput = namelist_extract( nlfile, "forceDeleteOutput", "logical")
+
 ;list_of_files="/global/homes/c/czarzyck/scratch/hyperion/CORI.VR28.NATL.WAT.CAM5.4CLM5.0.dtime900.003/atm/hist/*cam.h8.1986*.PTYPES.nc_remap.nc"
 ;VARNAME="PRECB_SN"
 ;traj_filename="./traj"
@@ -29,19 +54,19 @@ ms_to_inhr=141732.
 ;outFileName="TEST.nc"
 ;AGGRO_OPERATOR="sum"  ; sum, avg, min, max
 ;offset=6*ms_to_inhr
-;deltaDeg=15.0
+;deltaDeg=12.0
 ;doTimeSeries=True
 ;doRegionalOutput=False
 ;forceDeleteOutput=True
 
 ;list_of_files="/global/homes/c/czarzyck/scratch/hyperion/CORI.VR28.NATL.WAT.CAM5.4CLM5.0.dtime900.003/atm/hist/*cam.h3.1986*_remap.nc"
-;VARNAME="FLUT"
+;VARNAME="PSL"
 ;traj_filename="./traj"
 ;outDir="/global/homes/c/czarzyck/scratch/hyperion/"
 ;outFileName="TEST.nc"
 ;AGGRO_OPERATOR="min"  ; sum, avg, min, max
 ;offset=1.
-;deltaDeg=200.0
+;deltaDeg=12.0
 ;doTimeSeries=True
 ;doRegionalOutput=False
 ;forceDeleteOutput=False
@@ -70,18 +95,18 @@ ms_to_inhr=141732.
 ;doRegionalOutput=True
 ;forceDeleteOutput=True
 
-list_of_files=systemfunc("find /glade/u/home/zarzycki/scratch/snow/ -name *.SNOW.gridded.nc | sort -n")
-print(list_of_files)
-VARNAME="SNOW"
-traj_filename="reanalysis-track/traj/tempest.JRA.1958.001"
-outDir="/glade/scratch/zarzycki/"
-outFileName="SNOWTEST.nc"
-AGGRO_OPERATOR="sum"  ; sum, avg, min, max
-offset=1.
-deltaDeg=12.0
-doTimeSeries=True
-doRegionalOutput=True
-forceDeleteOutput=True
+;list_of_files=systemfunc("find /glade/u/home/zarzycki/scratch/snow/ -name *.SNOW.gridded.nc | sort -n")
+;print(list_of_files)
+;VARNAME="SNOW"
+;traj_filename="reanalysis-track/traj/tempest.JRA.1958.001"
+;outDir="/glade/scratch/zarzycki/"
+;outFileName="SNOWTEST.nc"
+;AGGRO_OPERATOR="sum"  ; sum, avg, min, max
+;offset=1.
+;deltaDeg=12.0
+;doTimeSeries=True
+;doRegionalOutput=True
+;forceDeleteOutput=True
 ; NL VARS +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
@@ -110,17 +135,17 @@ latBounds=packLatLonBounds(minLatOut,maxLatOut,minLonOut,maxLonOut)
 ;-------------Get trajectories------------------------------
 
 thefile=traj_filename
-ncols = 9                     ; assign number of columns
+ncols = 8                     ; assign number of columns
 maxLines = -1
 traj_data = getTrajectories(thefile,ncols,maxLines)
 
-traj_lon = traj_data(:,2,:)
-traj_lat = traj_data(:,3,:)
-traj_pres = traj_data(:,4,:)/100.
-traj_yyyy = traj_data(:,5,:)
-traj_mm = traj_data(:,6,:)
-traj_dd = traj_data(:,7,:) 
-traj_hh = traj_data(:,8,:)
+traj_lon = traj_data(:,1,:)
+traj_lat = traj_data(:,2,:)
+traj_pres = traj_data(:,3,:)/100.
+traj_yyyy = traj_data(:,4,:)
+traj_mm = traj_data(:,5,:)
+traj_dd = traj_data(:,6,:) 
+traj_hh = traj_data(:,7,:)
 
 delete(traj_data)
 
@@ -133,7 +158,8 @@ ntimes = ndims(1)
 
 ; Here we build a "lookup" table to find what times are on what files...
 ; get list of h3 files
-filelist = list_of_files
+;filelist = list_of_files
+filelist = systemfunc("ls "+list_of_files)  
 timeArr=buildTimeLookup(filelist)
 
 ;-------------get relevant coords------------------------------

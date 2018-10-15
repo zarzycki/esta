@@ -6,26 +6,42 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_code.ncl"
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_csm.ncl"
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/contributed.ncl"
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/shea_util.ncl"
-load "/glade/u/home/zarzycki/snow-tracking/calc_RSI/shapefile_ncl/shapefile_mask_data.ncl"
 ;========================================================
-begin
+ESTAPATH = getenv("ESTAPATH")
+fcntoload=ESTAPATH+"/functions/namelist_extract.ncl"
+if (fileexists(fcntoload)) then
+  loadscript(fcntoload)
+else
+  print("function "+fcntoload+" doesn't exist")
+  exit
+end if
+fcntoload=ESTAPATH+"/calc_RSI/shapefile_ncl/shapefile_mask_data.ncl"
+if (fileexists(fcntoload)) then
+  loadscript(fcntoload)
+else
+  print("function "+fcntoload+" doesn't exist")
+  exit
+end if
+;========================================================
 
-SNOWTRACKBASE="/glade/u/home/zarzycki/snow-tracking/"
+begin
 
 debug=False
 outputMask=True
 useExistingMask=True
 flattenPOP=False   ; do we want to spatially average pop density?
-maskFileName=SNOWTRACKBASE+"/calc_RSI/NEmask.nc"
-popFilePath=SNOWTRACKBASE+"/gen_pop_files/population.nc"
+maskFileName=ESTAPATH+"/calc_RSI/NEmask.nc"
+popFilePath=ESTAPATH+"/gen_pop_files/population.nc"
 
-if (isdefined("ensmember") .and. isdefined("outDir") .and. ensmember .ne. "XXX")
-  stormFilePath=outDir+"/conn-LESsimple."+ensmember+"."+timestring+".nc"
-  imgDir=outDir+"/images/"+ensmember+"/"+timestring+"/"
-  RSIoutFile=outDir+"/conn-RSI.LES."+ensmember+"."+timestring+".csv"
-else
-  ensmember="XXX"
-end if
+; READ NAMELISTS
+nlfile="nl.hyperion"
+outDir = namelist_extract( nlfile, "outDir", "string")
+outFileName = namelist_extract( nlfile, "outFileName", "string")
+configStr = namelist_extract( nlfile, "descStr", "string")
+RSIoutDir = namelist_extract( nlfile, "RSIoutDir", "string")
+
+RSIoutFile = RSIoutDir+"/"+RSIoutFile
+stormFilePath=outDir+"/"+outFileName
 
 if (.not. isdefined("stormID"))
   stormID=6
@@ -37,9 +53,14 @@ if (.not. isdefined("SNOWVARNAME"))
   print("WARNING: stormID not defined, defaulting to id: "+stormID)
 end if
 
+if (.not.(isdefined("ensmember") .and. ensmember .ne. "XXX"))
+  ensmember="XXX"
+end if
+
+
 ;=====================================================
 
-f=addfile(stormFilePath,"r")
+f=addfile(outDir+outFileName,"r")
 popFile=addfile(popFilePath,"r")
 POP=popFile->POP({37:49},{-82:-66})
 AREA=popFile->AREA({37:49},{-82:-66})

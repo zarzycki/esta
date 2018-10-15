@@ -1,0 +1,13 @@
+list_of_files="/global/homes/c/czarzyck/scratch/hyperion/CORI.VR28.NATL.WAT.CAM5.4CLM5.0.dtime900.003/atm/hist/*cam.h8.1986*.PTYPES.nc_remap.nc",
+VARNAME="PRECB_SN",
+traj_filename="./traj",
+outDir="/global/homes/c/czarzyck/scratch/hyperion/",
+outFileName="TEST.nc",
+RSIoutDir="/global/homes/c/czarzyck/scratch/hyperion/"
+AGGRO_OPERATOR="sum",
+offset=850392,
+deltaDeg=12.0,
+doTimeSeries=True,
+doRegionalOutput=False,
+forceDeleteOutput=True,
+descStr="HYP",
