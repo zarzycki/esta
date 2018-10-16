@@ -32,20 +32,21 @@ ms_to_inhr=141732.
 
 nlfile="nl.hyperion"
 
-list_of_files = namelist_extract( nlfile, "list_of_files", "string")
-VARNAME = namelist_extract( nlfile, "VARNAME", "string")
-traj_filename = namelist_extract( nlfile, "traj_filename", "string")
-outDir = namelist_extract( nlfile, "outDir", "string")
-outFileName = namelist_extract( nlfile, "outFileName", "string")
-AGGRO_OPERATOR = namelist_extract( nlfile, "AGGRO_OPERATOR", "string")
 
-offset = namelist_extract( nlfile, "offset", "float")
-deltaDeg = namelist_extract( nlfile, "deltaDeg", "float")
-outDir = namelist_extract( nlfile, "outDir", "string")
+traj_filename = namelist_extract( nlfile, "TRAJFILE", "string")
+outDir = namelist_extract( nlfile, "EX_OUTDIR", "string")
+outFileName = namelist_extract( nlfile, "EX_OUTFILE", "string")
+deltaDeg = namelist_extract( nlfile, "DELTADEG", "float")
+list_of_files = namelist_extract( nlfile, "LIST_SNOW", "string")
+VARNAME = namelist_extract( nlfile, "EX_INVARS", "string")
+AGGRO_OPERATOR = namelist_extract( nlfile, "EX_AGGOP", "string")
+offset = namelist_extract( nlfile, "EX_OFFSET", "float")
+doTimeSeries = namelist_extract( nlfile, "EX_DOTIMESERIES", "logical")
+doRegionalOutput = namelist_extract( nlfile, "EX_DOREGOUT", "logical")
+forceDeleteOutput = namelist_extract( nlfile, "EX_FORCEDELOUT", "logical")
 
-doTimeSeries = namelist_extract( nlfile, "doTimeSeries", "logical")
-doRegionalOutput = namelist_extract( nlfile, "doRegionalOutput", "logical")
-forceDeleteOutput = namelist_extract( nlfile, "forceDeleteOutput", "logical")
+
+
 
 ;list_of_files="/global/homes/c/czarzyck/scratch/hyperion/CORI.VR28.NATL.WAT.CAM5.4CLM5.0.dtime900.003/atm/hist/*cam.h8.1986*.PTYPES.nc_remap.nc"
 ;VARNAME="PRECB_SN"
@@ -109,29 +110,6 @@ forceDeleteOutput = namelist_extract( nlfile, "forceDeleteOutput", "logical")
 ;forceDeleteOutput=True
 ; NL VARS +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-
-;----------------Find min/max bounds-----------------------------------
-
-if (doRegionalOutput) then   ; If yes, truncation output
-  ;minLatOut=25.
-  ;maxLatOut=55.
-  ;minLonOut=265.
-  ;maxLonOut=300.
-  minLatOut=25.
-  maxLatOut=55.
-  minLonOut=265.-360
-  maxLonOut=300.-360
-else   ; if not, just set to very large neg/pos values since NCL indexes min/max auto this way
-  minLatOut=-99999.
-  maxLatOut=99999.
-  minLonOut=-99999.
-  maxLonOut=99999.
-end if
-
-;----------------Pack min/max lat/lon into single 4x1 var-----------------------------------
-
-latBounds=packLatLonBounds(minLatOut,maxLatOut,minLonOut,maxLonOut)
-
 ;-------------Get trajectories------------------------------
 
 thefile=traj_filename
@@ -154,12 +132,37 @@ nstorms = ndims(0)
 storm_index=ispan(0,nstorms-1,1)
 ntimes = ndims(1)
 
+
+do ii=0,dimsizes(VARNAME)-1
+
+;----------------Find min/max bounds-----------------------------------
+
+if (doRegionalOutput(ii)) then   ; If yes, truncation output
+  ;minLatOut=25.
+  ;maxLatOut=55.
+  ;minLonOut=265.
+  ;maxLonOut=300.
+  minLatOut=25.
+  maxLatOut=55.
+  minLonOut=265.-360
+  maxLonOut=300.-360
+else   ; if not, just set to very large neg/pos values since NCL indexes min/max auto this way
+  minLatOut=-99999.
+  maxLatOut=99999.
+  minLonOut=-99999.
+  maxLonOut=99999.
+end if
+
+;----------------Pack min/max lat/lon into single 4x1 var-----------------------------------
+
+latBounds=packLatLonBounds(minLatOut,maxLatOut,minLonOut,maxLonOut)
+
 ;-------------lookup table------------------------------
 
 ; Here we build a "lookup" table to find what times are on what files...
 ; get list of h3 files
 ;filelist = list_of_files
-filelist = systemfunc("ls "+list_of_files)  
+filelist = systemfunc("ls "+list_of_files(ii))  
 timeArr=buildTimeLookup(filelist)
 
 ;-------------get relevant coords------------------------------
@@ -169,7 +172,7 @@ lon=retlist[1]
 timeunits=retlist[2]
 opt=retlist[3]
 delete(retlist)
-
+delete(filelist)
 
 
 ;-------------setup arrays------------------------------
@@ -189,22 +192,24 @@ list_vars()
 
 ;-------------extract data from files------------------------------
 
-SNOWFALL=loopAndExtract(SNOWFALL,VARNAME,lat2D,lon2D,deltaDeg,nstorms,ntimes,sttime,entime,durtime,traj_lon,traj_lat,traj_yyyy,traj_mm,traj_dd,traj_hh,timeArr,timeunits,opt,latBounds,offset)
+SNOWFALL=loopAndExtract(SNOWFALL,VARNAME(ii),lat2D,lon2D,deltaDeg,nstorms,ntimes,sttime,entime,durtime,traj_lon,traj_lat,traj_yyyy,traj_mm,traj_dd,traj_hh,timeArr,timeunits,opt,latBounds,offset(ii))
+
+delete(timeArr)
 
 ;-------------do summation------------------------------
 
-if (AGGRO_OPERATOR .eq. "sum") then
+if (AGGRO_OPERATOR(ii) .eq. "sum") then
   CUM_SNOWFALL=dim_sum_n_Wrap(SNOWFALL,1)
-  AGGRO_OUT_NAME="SUM_"+VARNAME
-else if (AGGRO_OPERATOR .eq. "avg") then
+  AGGRO_OUT_NAME="SUM_"+VARNAME(ii)
+else if (AGGRO_OPERATOR(ii) .eq. "avg") then
   CUM_SNOWFALL=dim_avg_n_Wrap(SNOWFALL,1)
-  AGGRO_OUT_NAME="AVG_"+VARNAME
-else if (AGGRO_OPERATOR .eq. "min") then
+  AGGRO_OUT_NAME="AVG_"+VARNAME(ii)
+else if (AGGRO_OPERATOR(ii) .eq. "min") then
   CUM_SNOWFALL=dim_min_n_Wrap(SNOWFALL,1)
-  AGGRO_OUT_NAME="MIN_"+VARNAME
-else if (AGGRO_OPERATOR .eq. "max") then
+  AGGRO_OUT_NAME="MIN_"+VARNAME(ii)
+else if (AGGRO_OPERATOR(ii) .eq. "max") then
   CUM_SNOWFALL=dim_max_n_Wrap(SNOWFALL,1)
-  AGGRO_OUT_NAME="MAX_"+VARNAME
+  AGGRO_OUT_NAME="MAX_"+VARNAME(ii)
 else
   print("invalid aggregator operator, exiting...")
   exit
@@ -226,7 +231,7 @@ outFile=outDir+"/"+outFileName
 print("writing:   "+outFile)
 
 system("mkdir -p "+outDir)
-if (forceDeleteOutput) then
+if (forceDeleteOutput(ii)) then
   print("Force deleting any existing file...")
   system("/bin/rm -f "+outFile)
   fileMode="c"
@@ -258,9 +263,13 @@ ncdf->durtime=durtime
 ncdf->$AGGRO_OUT_NAME$ = CUM_SNOWFALL(:,{minLatOut:maxLatOut},{minLonOut:maxLonOut})
 
 ; print 3-D vars
-if (doTimeSeries) then
-  ncdf->$VARNAME$ = SNOWFALL(:,:,{minLatOut:maxLatOut},{minLonOut:maxLonOut})
+if (doTimeSeries(ii)) then
+  ncdf->$VARNAME(ii)$ = SNOWFALL(:,:,{minLatOut:maxLatOut},{minLonOut:maxLonOut})
 end if
+
+delete(AGGRO_OUT_NAME)
+
+end do
 
 wallClockElapseTime(wcStrtWriteout, "Time to write output", 0)
 wallClockElapseTime(wcStrt, "Total run time", 0)

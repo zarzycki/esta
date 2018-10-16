@@ -2,7 +2,7 @@
 
 ################################################################
 #SBATCH -N 1                #Number of nodes
-#SBATCH -t 01:00:00         #Time limit
+#SBATCH -t 00:30:00         #Time limit
 #SBATCH -q premium          #Use the regular QOS
 #SBATCH -L SCRATCH          #Job requires $SCRATCH file system
 #SBATCH -C knl,quad,cache   #Use KNL nodes in quad cache format (default, recommended)
@@ -28,10 +28,11 @@ CONNECTFLAG="--in_connect /global/homes/c/czarzyck/tempest-scripts/hyperion/ne0n
 DATESTRING=`date +"%s%N"`
 FILELISTNAME=filelist.txt.${DATESTRING}
 TRAJFILENAME=trajectories.txt.${UQSTR}
+FILTFILE=traj.filt
 touch $FILELISTNAME
 
 # Generate parallel file
-FILES=${PATHTOFILES}/*.h3.1986*.nc
+FILES=${PATHTOFILES}/*.h3.*.nc
 for f in $FILES
 do
   echo "${f};${TOPOFILE}" >> $FILELISTNAME
@@ -48,11 +49,9 @@ rm cyclones_tempest.${DATESTRING}*
 # Stitch candidate cyclones together
 ${TEMPESTEXTREMESDIR}/bin/StitchNodes --format "ncol,lon,lat,slp" --in cyclones.${DATESTRING} --range 8.0 --minlength 5 --maxgap 0 --out ${TRAJFILENAME} --threshold "lat,>,25,3;lon,>,260,3;lat,<,65,3;lon,<,310,3"
 
-endtime=$(date -u +"%s")
-tottime=$(($endtime-$starttime))
-
-printf "${tottime}\n" >> timing.txt
+ncl filter_ne_storms.ncl 'infile="'${TRAJFILENAME}'"' 'outfile="'${FILTFILE}'"'
 
 rm cyclones.${DATESTRING}
 rm ${FILELISTNAME}
 rm log*
+

@@ -10,14 +10,15 @@
 
 date
 
-export ESTAPATH="/global/homes/c/czarzyck/esta/"
+while IFS='=' read -r var value ; do
+  value=`echo $value | sed 's/\(.*\),/\1/'`  #strip off last comma
+  value=`echo $value | sed 's/\"//g'`
+  echo "... SETTING: ${var} to ${value}"
+  export "$var"="$value"
+done < nl.hyperion
 
-SWE="12"
-DESCSTR=HYPERION
-RSIOUTDIR=/global/homes/c/czarzyck/scratch/hyperion/
-TRAJFILE="./traj"
+# Hardcoded options
 RSISNOWFILE="RSI.SNOW."${DESCSTR}".csv"
-
 TRAJDIR=${ESTAPATH}/tracking/
 RSIDIR=${ESTAPATH}/calc_RSI/
 
@@ -33,7 +34,7 @@ endtimeextract=$(date -u +"%s")
 ###################################################################################################
 
 starttimeRSI=$(date -u +"%s")
-mkdir -p ${RSIOUTDIR}
+mkdir -p ${RSI_OUTDIR}
 SWES=(${SWE} ${SWE})
 SNOWVARNAMES=("SUM_PRECB_SN" "NONE")
 RSISNOWFILES=(${RSISNOWFILE}".SNOW.csv" ${RSISNOWFILE}".PRECT.csv")
@@ -41,14 +42,14 @@ RSISNOWFILES=(${RSISNOWFILE}".SNOW.csv" ${RSISNOWFILE}".PRECT.csv")
 # LOOPVAR does both snow and total precip (pretending total precip is snow)
 for LOOPVAR in `seq 0 1`
 do
-  rm ${RSIOUTDIR}/${RSISNOWFILES[${LOOPVAR}]}
+  rm ${RSI_OUTDIR}/${RSISNOWFILES[${LOOPVAR}]}
   LOOPST=0
   LOOPEN=$((`grep -c start ${TRAJFILE}` - 1))
   for IX in `seq ${LOOPST} ${LOOPEN}`
   do
      echo $IX
     (set -x; ncl ${RSIDIR}/calculate_RSI.ncl stormID=${IX} SWE=${SWES[${LOOPVAR}]} \
-      'imgDir="'${RSIOUTDIR}'/images-RSI-tempest/'${DESCSTR}'/"' \
+      'imgDir="'${RSI_OUTDIR}'/images-RSI-tempest/'${DESCSTR}'/"' \
       'RSIoutFile="'${RSISNOWFILES[${LOOPVAR}]}'"' \
       'SNOWVARNAME="'${SNOWVARNAMES[${LOOPVAR}]}'"')
   done

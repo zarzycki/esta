@@ -35,10 +35,10 @@ popFilePath=ESTAPATH+"/gen_pop_files/population.nc"
 
 ; READ NAMELISTS
 nlfile="nl.hyperion"
-outDir = namelist_extract( nlfile, "outDir", "string")
-outFileName = namelist_extract( nlfile, "outFileName", "string")
-configStr = namelist_extract( nlfile, "descStr", "string")
-RSIoutDir = namelist_extract( nlfile, "RSIoutDir", "string")
+outDir = namelist_extract( nlfile, "EX_OUTDIR", "string")
+outFileName = namelist_extract( nlfile, "EX_OUTFILE", "string")
+configStr = namelist_extract( nlfile, "DESCSTR", "string")
+RSIoutDir = namelist_extract( nlfile, "RSI_OUTDIR", "string")
 
 RSIoutFile = RSIoutDir+"/"+RSIoutFile
 stormFilePath=outDir+"/"+outFileName

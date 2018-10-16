@@ -52,7 +52,6 @@ begin
 
 ;---Number of fields for 'namlst(iKEY)' line.  This includes the keyword.
    nfld  = str_fields_count(namlst(iKEY), delim)   
-
    chr   := tochar(namlst(iKEY))
    nchr   = dimsizes(chr)
    if (chr(nchr-1).eq.",") then
@@ -60,7 +59,11 @@ begin
    end if
 
    if (return_type.eq."string") then
-       value=str_get_field(namlst(iKEY), 2, "=,"+tab+dq)
+       ;value=str_get_field(namlst(iKEY), 2, "=,"+tab+dq)
+       valuetmp=str_split(namlst(iKEY),"=")     ; first chop off before equals sign
+       value=str_split(valuetmp(1),","+tab+dq)  ; then split on comma delimiter
+       ;print(namlst(iKEY)+"")
+       ;print(value+"")
        print("Reading: "+keynam+" from "+pfName+" as "+return_type+":          "+value)
        return(value)
    end if
