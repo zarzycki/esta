@@ -6,7 +6,7 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_code.ncl"
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_csm.ncl"
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/contributed.ncl"
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/shea_util.ncl"
-load "~/ncl/functions/getTrajectories.ncl"
+load "~/ncl-zarzycki/functions/getTrajectories.ncl"
 load "fcns-extract-storm.ncl"
 
 ESTAPATH = getenv("ESTAPATH")
@@ -30,7 +30,7 @@ pi = 3.14159265358979
 omega = 7.2921E-5
 ms_to_inhr=141732.
 
-nlfile="nl.lens.pd.001"
+;nlfile="nl.hyperion"
 
 
 traj_filename = namelist_extract( nlfile, "TRAJFILE", "string")
@@ -113,17 +113,17 @@ forceDeleteOutput = namelist_extract( nlfile, "EX_FORCEDELOUT", "logical")
 ;-------------Get trajectories------------------------------
 
 thefile=traj_filename
-ncols = 9                     ; assign number of columns
+ncols = 8                     ; assign number of columns
 maxLines = -1
 traj_data = getTrajectories(thefile,ncols,maxLines)
 
-traj_lon = traj_data(:,2,:)
-traj_lat = traj_data(:,3,:)
-traj_pres = traj_data(:,4,:)/100.
-traj_yyyy = traj_data(:,5,:)
-traj_mm = traj_data(:,6,:)
-traj_dd = traj_data(:,7,:) 
-traj_hh = traj_data(:,8,:)
+traj_lon = traj_data(:,1,:)
+traj_lat = traj_data(:,2,:)
+traj_pres = traj_data(:,3,:)/100.
+traj_yyyy = traj_data(:,4,:)
+traj_mm = traj_data(:,5,:)
+traj_dd = traj_data(:,6,:) 
+traj_hh = traj_data(:,7,:)
 
 delete(traj_data)
 

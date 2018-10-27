@@ -34,7 +34,7 @@ maskFileName=ESTAPATH+"/calc_RSI/NEmask.nc"
 popFilePath=ESTAPATH+"/gen_pop_files/population.nc"
 
 ; READ NAMELISTS
-nlfile="nl.lens.pd.001"
+;nlfile="nl.lens.pd.001"
 outDir = namelist_extract( nlfile, "EX_OUTDIR", "string")
 outFileName = namelist_extract( nlfile, "EX_OUTFILE", "string")
 configStr = namelist_extract( nlfile, "DESCSTR", "string")

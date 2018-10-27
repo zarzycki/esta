@@ -10,12 +10,14 @@
 
 date
 
+NAMELIST="nl.hyperion"
+
 while IFS='=' read -r var value ; do
   value=`echo $value | sed 's/\(.*\),/\1/'`  #strip off last comma
   value=`echo $value | sed 's/\"//g'`
   echo "... SETTING: ${var} to ${value}"
   export "$var"="$value"
-done < nl.lens.pd.001
+done < ${NAMELIST}
 
 # Hardcoded options
 RSISNOWFILE="RSI.SNOW."${DESCSTR}".csv"
@@ -27,17 +29,15 @@ starttime=$(date -u +"%s")
 ###################################################################################################
 
 starttimeextract=$(date -u +"%s")
-EXTRACTOUTFILE=${EXTRACTOUTFILE}".tempest.nc"
-ncl ${TRAJDIR}/extract_individual_storms-lite.ncl
+#ncl ${TRAJDIR}/extract_individual_storms-lite.ncl 'nlfile="'${NAMELIST}'"'
 endtimeextract=$(date -u +"%s")
 
-exit
 ###################################################################################################
 
 starttimeRSI=$(date -u +"%s")
 mkdir -p ${RSI_OUTDIR}
 SWES=(${SWE} ${SWE})
-SNOWVARNAMES=("SUM_PRECT_SNOW" "NONE")
+SNOWVARNAMES=("SUM_PRECB_SN" "NONE")
 RSISNOWFILES=(${RSISNOWFILE}".SNOW.csv" ${RSISNOWFILE}".PRECT.csv")
 
 # LOOPVAR does both snow and total precip (pretending total precip is snow)
@@ -50,6 +50,7 @@ do
   do
      echo $IX
     (set -x; ncl ${RSIDIR}/calculate_RSI.ncl stormID=${IX} SWE=${SWES[${LOOPVAR}]} \
+      'nlfile="'${NAMELIST}'"' \
       'imgDir="'${RSI_OUTDIR}'/images-RSI-tempest/'${DESCSTR}'/"' \
       'RSIoutFile="'${RSISNOWFILES[${LOOPVAR}]}'"' \
       'SNOWVARNAME="'${SNOWVARNAMES[${LOOPVAR}]}'"')
