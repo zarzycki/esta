@@ -1,0 +1,15 @@
+ESTAPATH="/glade/u/home/zarzycki/snow-tracking/",
+LIST_SNOW="~/scratch/LENS-snow/b.e11.B20TRC5CNBDRD.f09_g16.001.cam.h2.PRECT_SNOW.1990010100Z-2005123118Z.nc"
+TRAJFILE="./traj/tempest.LENS.1990.001",
+DELTADEG=12.0,
+EX_OUTDIR="/glade/scratch/zarzycki/test/",
+EX_OUTFILE="TEST.nc",
+EX_INVARS="PRECT_SNOW",
+EX_AGGOP="sum",
+EX_OFFSET=850392,
+EX_DOTIMESERIES=False,
+EX_DOREGOUT=True,
+EX_FORCEDELOUT=True,
+DESCSTR="LENS.1990.001",
+SWE="12",
+RSI_OUTDIR="/glade/scratch/zarzycki/test/"

@@ -61,13 +61,22 @@ begin
 
   ; we only need first file since we can get them from all files
   ftmp = addfile(filelist(0),"r")
+
+  lontmp=ftmp->lon
+  if (min(lontmp) .lt. 0 .and. maxLonOut .gt. 180.) then
+    print("Longitude convention mismatch! Setting regional output to -180-180.")
+    minLonOut=minLonOut-360.
+    maxLonOut=maxLonOut-360.
+  end if
+  delete(lontmp)
+
   lat=ftmp->lat({minLatOut:maxLatOut})
   lon=ftmp->lon({minLonOut:maxLonOut})
   timeunits=ftmp->time@units
   opt=0
   opt@calendar=ftmp->time@calendar
   delete(ftmp)
-  return( [/ lat,lon,timeunits,opt /] )
+  return( [/ lat,lon,minLonOut,maxLonOut,timeunits,opt /] )
 end
 
 

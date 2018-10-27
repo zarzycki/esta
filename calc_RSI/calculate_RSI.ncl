@@ -34,7 +34,7 @@ maskFileName=ESTAPATH+"/calc_RSI/NEmask.nc"
 popFilePath=ESTAPATH+"/gen_pop_files/population.nc"
 
 ; READ NAMELISTS
-nlfile="nl.hyperion"
+nlfile="nl.lens.pd.001"
 outDir = namelist_extract( nlfile, "EX_OUTDIR", "string")
 outFileName = namelist_extract( nlfile, "EX_OUTFILE", "string")
 configStr = namelist_extract( nlfile, "DESCSTR", "string")
@@ -57,7 +57,6 @@ if (.not.(isdefined("ensmember") .and. ensmember .ne. "XXX"))
   ensmember="XXX"
 end if
 
-
 ;=====================================================
 
 f=addfile(outDir+outFileName,"r")
@@ -70,12 +69,18 @@ DURTIME=f->durtime(toint(stormID))
 STTIMESTR=tostring(STTIME)
 DURTIMESTR=tostring(DURTIME)
 
-SNOW=f->$SNOWVARNAME$(toint(stormID),{37:49},{-82.:-66.})
+if (min(f->lon) .lt. 0.0) then
+  SNOW=f->$SNOWVARNAME$(toint(stormID),{37:49},{-82.:-66.})
+else
+  SNOW=f->$SNOWVARNAME$(toint(stormID),{37:49},{-82.+360.:-66.+360.})
+  lon=-(360.-SNOW&lon)
+  SNOW&lon=lon
+end if
 
-;lon=-(360.-SNOW&lon)
-;SNOW&lon=lon
+
 
 if (isvar("SWE"))
+  print("SWE: "+SWE)
   SNOW = SNOW*totype(SWE,typeof(SNOW))
 end if
 

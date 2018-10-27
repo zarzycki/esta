@@ -15,7 +15,7 @@ while IFS='=' read -r var value ; do
   value=`echo $value | sed 's/\"//g'`
   echo "... SETTING: ${var} to ${value}"
   export "$var"="$value"
-done < nl.hyperion
+done < nl.lens.pd.001
 
 # Hardcoded options
 RSISNOWFILE="RSI.SNOW."${DESCSTR}".csv"
@@ -31,12 +31,13 @@ EXTRACTOUTFILE=${EXTRACTOUTFILE}".tempest.nc"
 ncl ${TRAJDIR}/extract_individual_storms-lite.ncl
 endtimeextract=$(date -u +"%s")
 
+exit
 ###################################################################################################
 
 starttimeRSI=$(date -u +"%s")
 mkdir -p ${RSI_OUTDIR}
 SWES=(${SWE} ${SWE})
-SNOWVARNAMES=("SUM_PRECB_SN" "NONE")
+SNOWVARNAMES=("SUM_PRECT_SNOW" "NONE")
 RSISNOWFILES=(${RSISNOWFILE}".SNOW.csv" ${RSISNOWFILE}".PRECT.csv")
 
 # LOOPVAR does both snow and total precip (pretending total precip is snow)
