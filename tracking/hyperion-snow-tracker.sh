@@ -29,7 +29,7 @@ starttime=$(date -u +"%s")
 ###################################################################################################
 
 starttimeextract=$(date -u +"%s")
-#ncl ${TRAJDIR}/extract_individual_storms-lite.ncl 'nlfile="'${NAMELIST}'"'
+ncl ${TRAJDIR}/extract_individual_storms-lite.ncl 'nlfile="'${NAMELIST}'"'
 endtimeextract=$(date -u +"%s")
 
 ###################################################################################################

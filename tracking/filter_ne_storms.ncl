@@ -6,13 +6,15 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_code.ncl"
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_csm.ncl"
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/contributed.ncl"
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/shea_util.ncl"
-load "./functions.ncl"
+load "../functions/functions.ncl"
+load "../functions/getTrajectoriesGeneric.ncl"
 
 ;========================================================
 begin
 
 ;infile="trajectories.txt.MP15A-120A-US-EXP213"
 ;outfile="traj.filt"
+;threshold = 20.0
 
 system("rm "+outfile)
 
@@ -20,21 +22,25 @@ searchLat = 40.
 searchLon1 = 288.
 searchLon2 = 285.
 threshold = 8.0
-;threshold = 20.0
 ; usually 10 and 4
 firstmm=10
 lastmm=4
 
-ncols = 8 ; 9 for LENS 
-maxLines = -1  ; set to -1 for auto-detection
-traj_data = getTrajectories(infile,ncols,maxLines)
-
 ; need to be modified to 2,3,4,6 if using LENS/latlon data
-lon = traj_data(:,1,:)
-lat = traj_data(:,2,:)
-pres = traj_data(:,3,:)/100.
-year = toint(traj_data(:,4,:))
-month = toint(traj_data(:,5,:))
+thefile=traj_filename
+ncols = 8                     ; assign number of columns
+maxLines = -1
+headerDelimStr = "start"
+delimStr="tab"
+isUnstruc=True
+isHeader=False
+traj_data = getTrajectoriesGeneric(infile,ncols,maxLines,headerDelimStr,delimStr,isUnstruc,isHeader)
+
+lon = traj_data(:,2,:)
+lat = traj_data(:,3,:)
+pres = traj_data(:,4,:)/100.
+year = traj_data(:,5,:)
+month = traj_data(:,6,:)
 ndims = dimsizes(lon)
 nstorms = ndims(0)
 ntimesall = ndims(1)

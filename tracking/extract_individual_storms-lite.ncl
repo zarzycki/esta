@@ -6,8 +6,8 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_code.ncl"
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_csm.ncl"
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/contributed.ncl"
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/shea_util.ncl"
-load "~/ncl-zarzycki/functions/getTrajectoriesGeneric.ncl"
-load "fcns-extract-storm.ncl"
+load "../functions/getTrajectoriesGeneric.ncl"
+load "../functions/fcns-extract-storm.ncl"
 
 ESTAPATH = getenv("ESTAPATH")
 fcntoload=ESTAPATH+"/functions/namelist_extract.ncl"
