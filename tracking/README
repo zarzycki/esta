@@ -1,5 +1,0 @@
-### 9/28/17
-
-To run batch tracker on login nodes...
-
-nohup ./batch-loginnodes.sh & 
