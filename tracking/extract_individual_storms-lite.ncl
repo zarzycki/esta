@@ -8,15 +8,8 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/contributed.ncl"
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/shea_util.ncl"
 load "../functions/getTrajectoriesGeneric.ncl"
 load "../functions/fcns-extract-storm.ncl"
+load "../functions/namelist_extract.ncl"
 
-ESTAPATH = getenv("ESTAPATH")
-fcntoload=ESTAPATH+"/functions/namelist_extract.ncl"
-if (fileexists(fcntoload)) then
-  loadscript(fcntoload)
-else
-  print("function "+fcntoload+" doesn't exist")
-  exit
-end if
 ;========================================================
 
 begin
@@ -32,7 +25,6 @@ ms_to_inhr=141732.
 
 nlfile="nl.hyperion"
 
-
 traj_filename = namelist_extract( nlfile, "TRAJFILE", "string")
 outDir = namelist_extract( nlfile, "EX_OUTDIR", "string")
 outFileName = namelist_extract( nlfile, "EX_OUTFILE", "string")
@@ -44,71 +36,6 @@ offset = namelist_extract( nlfile, "EX_OFFSET", "float")
 doTimeSeries = namelist_extract( nlfile, "EX_DOTIMESERIES", "logical")
 doRegionalOutput = namelist_extract( nlfile, "EX_DOREGOUT", "logical")
 forceDeleteOutput = namelist_extract( nlfile, "EX_FORCEDELOUT", "logical")
-
-
-
-
-;list_of_files="/global/homes/c/czarzyck/scratch/hyperion/CORI.VR28.NATL.WAT.CAM5.4CLM5.0.dtime900.003/atm/hist/*cam.h8.1986*.PTYPES.nc_remap.nc"
-;VARNAME="PRECB_SN"
-;traj_filename="./traj"
-;outDir="/global/homes/c/czarzyck/scratch/hyperion/"
-;outFileName="TEST.nc"
-;AGGRO_OPERATOR="sum"  ; sum, avg, min, max
-;offset=6*ms_to_inhr
-;deltaDeg=12.0
-;doTimeSeries=True
-;doRegionalOutput=False
-;forceDeleteOutput=True
-
-;list_of_files="/global/homes/c/czarzyck/scratch/hyperion/CORI.VR28.NATL.WAT.CAM5.4CLM5.0.dtime900.003/atm/hist/*cam.h3.1986*_remap.nc"
-;VARNAME="PSL"
-;traj_filename="./traj"
-;outDir="/global/homes/c/czarzyck/scratch/hyperion/"
-;outFileName="TEST.nc"
-;AGGRO_OPERATOR="min"  ; sum, avg, min, max
-;offset=1.
-;deltaDeg=12.0
-;doTimeSeries=True
-;doRegionalOutput=False
-;forceDeleteOutput=False
-
-;list_of_files="~/scratch/TEST-SNOW/*ne30*remap.nc"
-;VARNAME="PRECBSN"
-;traj_filename="./traj.filt"
-;outDir="/glade/scratch/zarzycki/"
-;outFileName="SNOWTEST.nc"
-;AGGRO_OPERATOR="sum"  ; sum, avg, min, max
-;offset=6*ms_to_inhr
-;deltaDeg=15.0
-;doTimeSeries=True
-;doRegionalOutput=False
-;forceDeleteOutput=True
-
-;list_of_files="/glade/u/home/zarzycki/scratch/ASD/snow-regrid/*h8*remap.nc"
-;VARNAME="PRECBSN"
-;traj_filename="./traj.filt"
-;outDir="/glade/scratch/zarzycki/"
-;outFileName="SNOWTEST.nc"
-;AGGRO_OPERATOR="sum"  ; sum, avg, min, max
-;offset=6*ms_to_inhr
-;deltaDeg=15.0
-;doTimeSeries=True
-;doRegionalOutput=True
-;forceDeleteOutput=True
-
-;list_of_files=systemfunc("find /glade/u/home/zarzycki/scratch/snow/ -name *.SNOW.gridded.nc | sort -n")
-;print(list_of_files)
-;VARNAME="SNOW"
-;traj_filename="reanalysis-track/traj/tempest.JRA.1958.001"
-;outDir="/glade/scratch/zarzycki/"
-;outFileName="SNOWTEST.nc"
-;AGGRO_OPERATOR="sum"  ; sum, avg, min, max
-;offset=1.
-;deltaDeg=12.0
-;doTimeSeries=True
-;doRegionalOutput=True
-;forceDeleteOutput=True
-; NL VARS +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 ;-------------Get trajectories------------------------------
 
