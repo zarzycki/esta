@@ -63,7 +63,6 @@ nstorms = ndims(0)
 storm_index=ispan(0,nstorms-1,1)
 ntimes = ndims(1)
 
-
 do ii=0,dimsizes(VARNAME)-1
 
 ;----------------Find min/max bounds-----------------------------------
