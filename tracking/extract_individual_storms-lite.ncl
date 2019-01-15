@@ -6,9 +6,29 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_code.ncl"
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_csm.ncl"
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/contributed.ncl"
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/shea_util.ncl"
-load "../functions/getTrajectoriesGeneric.ncl"
-load "../functions/fcns-extract-storm.ncl"
-load "../functions/namelist_extract.ncl"
+
+ESTAPATH = getenv("ESTAPATH")
+fcntoload=ESTAPATH+"/functions/getTrajectoriesGeneric.ncl"
+if (fileexists(fcntoload)) then
+  loadscript(fcntoload)
+else
+  print("function "+fcntoload+" doesn't exist")
+  exit
+end if
+fcntoload=ESTAPATH+"/functions/fcns-extract-storm.ncl"
+if (fileexists(fcntoload)) then
+  loadscript(fcntoload)
+else
+  print("function "+fcntoload+" doesn't exist")
+  exit
+end if
+fcntoload=ESTAPATH+"/functions/namelist_extract.ncl"
+if (fileexists(fcntoload)) then
+  loadscript(fcntoload)
+else
+  print("function "+fcntoload+" doesn't exist")
+  exit
+end if
 
 ;========================================================
 
@@ -23,9 +43,10 @@ pi = 3.14159265358979
 omega = 7.2921E-5
 ms_to_inhr=141732.
 
-nlfile="nl.hyperion"
+;nlfile="nl.gefs"
 
-traj_filename = namelist_extract( nlfile, "TRAJFILE", "string")
+traj_dir = namelist_extract( nlfile, "TRAJDIR", "string")
+UQSTR = namelist_extract( nlfile, "TE_UQSTR", "string")
 outDir = namelist_extract( nlfile, "EX_OUTDIR", "string")
 outFileName = namelist_extract( nlfile, "EX_OUTFILE", "string")
 deltaDeg = namelist_extract( nlfile, "DELTADEG", "float")
@@ -39,12 +60,12 @@ forceDeleteOutput = namelist_extract( nlfile, "EX_FORCEDELOUT", "logical")
 
 ;-------------Get trajectories------------------------------
 
-thefile=traj_filename
-ncols = 8                     ; assign number of columns
+thefile=traj_dir+"/traj."+UQSTR
+ncols = 9                     ; assign number of columns
 maxLines = -1
 headerDelimStr = "start"
 delimStr="tab"
-isUnstruc=True
+isUnstruc=False
 isHeader=False
 traj_data = getTrajectoriesGeneric(thefile,ncols,maxLines,headerDelimStr,delimStr,isUnstruc,isHeader)
 

@@ -6,8 +6,22 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_code.ncl"
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_csm.ncl"
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/contributed.ncl"
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/shea_util.ncl"
-load "../functions/functions.ncl"
-load "../functions/getTrajectoriesGeneric.ncl"
+
+ESTAPATH = getenv("ESTAPATH")
+fcntoload=ESTAPATH+"/functions/getTrajectoriesGeneric.ncl"
+if (fileexists(fcntoload)) then
+  loadscript(fcntoload)
+else
+  print("function "+fcntoload+" doesn't exist")
+  exit
+end if
+fcntoload=ESTAPATH+"/functions/functions.ncl"
+if (fileexists(fcntoload)) then
+  loadscript(fcntoload)
+else
+  print("function "+fcntoload+" doesn't exist")
+  exit
+end if
 
 ;========================================================
 begin
@@ -27,12 +41,12 @@ firstmm=10
 lastmm=4
 
 ; need to be modified to 2,3,4,6 if using LENS/latlon data
-thefile=traj_filename
+thefile=infile
 ncols = 8                     ; assign number of columns
 maxLines = -1
 headerDelimStr = "start"
 delimStr="tab"
-isUnstruc=True
+isUnstruc=False
 isHeader=False
 traj_data = getTrajectoriesGeneric(infile,ncols,maxLines,headerDelimStr,delimStr,isUnstruc,isHeader)
 
