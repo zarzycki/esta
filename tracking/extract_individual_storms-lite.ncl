@@ -112,8 +112,8 @@ latBounds=packLatLonBounds(minLatOut,maxLatOut,minLonOut,maxLonOut)
 
 ; Here we build a "lookup" table to find what times are on what files...
 ; get list of h3 files
-;filelist = list_of_files
-filelist = systemfunc("ls "+list_of_files(ii))  
+filelist = asciiread(list_of_files(ii),-1,"string")
+;filelist = systemfunc("ls "+list_of_files(ii))  
 timeArr=buildTimeLookup(filelist)
 
 ;-------------get relevant coords------------------------------

@@ -34,7 +34,7 @@ TRAJFILE=${TRAJDIR}"/traj."${TE_UQSTR}
 
 mkdir -p ${RSI_OUTDIR}
 SWES=(${SWE} ${SWE})
-SNOWVARNAMES=("SUM_PRECT_SNOW" "NONE")
+SNOWVARNAMES=($RSI_SUMVAR "NONE")
 RSISNOWFILES=(${RSISNOWFILE}".SNOW.csv" ${RSISNOWFILE}".PRECT.csv")
 
 # LOOPVAR does snow first, if you'd like to do another variable (like PRECT/RPI from
