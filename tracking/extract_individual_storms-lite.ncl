@@ -144,7 +144,7 @@ entime=retlist[4]
 durtime=retlist[5]
 delete(retlist)
 
-list_vars()
+;list_vars()
 
 ;-------------extract data from files------------------------------
 

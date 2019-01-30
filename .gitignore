@@ -1,4 +1,6 @@
+*.swp
 *.nc
+filelist*txt
 !population.nc
 !NEmask.nc
 *.csv
@@ -7,6 +9,7 @@ timing.txt
 slurm-*
 Spatial_population_scenarios_NetCDF.zip
 traj
+traj.*
 trajectories.txt*
 1out
 commands.*
