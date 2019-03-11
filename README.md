@@ -52,7 +52,13 @@ SNOW (time, lat, lon)
 - Time must be in a compliant format (ex: "hours since 2000-01-01 00:00") and contain both a "units" and "calendar" attribute).
 - Data should be 6-hourly (00Z, 06Z, 12Z, 18Z), although other increments are supported with minor tweaks to the code. However, PSL and SNOW data should be at the same temporal resolution (i.e., if 3-hourly PSL data is available but 6-hourly SNOW, PSL should be subsampled every other time to match).
 
-See example of data files in XXXXXX. If you have a dataset you believe to be a standard, compliant format but breaks ESTA, please contact me.
+Sample data files for January 2016 (JRA-55) can be downloaded:
+
+```
+wget http://www.personal.psu.edu/cmz5202/data/esta-JRA-sample.tar.gz
+```
+
+If you have a dataset you believe to be a standard, compliant format but breaks ESTA, please contact me.
 
 ### 2.) Build filelist lookups
 
