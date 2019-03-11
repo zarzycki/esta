@@ -16,7 +16,7 @@ output_type = "x11"
 
 ms_to_kts = 1.94384449
 
-thefile="traj.filt"
+thefile="traj.JRA"
 ncols = 9 ; number of columns in non-header rows of trajectory file
 maxLines = -1  ; set to -1 for auto-detection
 traj_data = getTrajectories(thefile,ncols,maxLines)
