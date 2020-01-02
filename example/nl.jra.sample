@@ -1,7 +1,6 @@
 ESTAPATH="/glade/u/home/zarzycki/snow-tracking/"
 TE_TEMPESTEXTREMESDIR="/glade/work/zarzycki/tempestextremes_noMPI/"
 TE_UQSTR="JRA.2016"
-TE_PATHTOFILES="UNSET"
 TE_CONNECTFLAG=""
 TE_MPIRUNCMD=""
 FILELISTNAME="filelist.PSL.JRA.2016"
@@ -13,7 +12,7 @@ EX_OUTDIR="./storms/"
 EX_OUTFILE="JRA.2016.nc"
 EX_INVARS="SNOW","PSL"
 EX_AGGOP="sum","min"
-EX_OFFSET=850392,1
+EX_OFFSET=1,1
 EX_DOTIMESERIES=True,True
 EX_DOREGOUT=True,True
 EX_FORCEDELOUT=True,False

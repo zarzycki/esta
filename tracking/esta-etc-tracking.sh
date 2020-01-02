@@ -45,7 +45,7 @@ starttime=$(date -u +"%s")
 
 STR_DETECT="--verbosity 0 --timestride 1 ${TE_CONNECTFLAG} --out cyclones_tempest.${DATESTRING} --mergedist 8.0 --closedcontourcmd PSL,200.,6.,0 --outputcmd PSL,min,0"
 touch cyclones.${DATESTRING}
-${TE_MPIRUNCMD} ${TE_TEMPESTEXTREMESDIR}/bin/DetectCyclonesUnstructured --in_data_list "${FILELISTNAME}" ${STR_DETECT} </dev/null
+${TE_MPIRUNCMD} ${TE_TEMPESTEXTREMESDIR}/bin/DetectNodes --in_data_list "${FILELISTNAME}" ${STR_DETECT} </dev/null
 cat cyclones_tempest.${DATESTRING}* >> cyclones.${DATESTRING}
 rm cyclones_tempest.${DATESTRING}*
 

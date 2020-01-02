@@ -118,8 +118,8 @@ timeArr=buildTimeLookup(filelist)
 
 ;-------------get relevant coords------------------------------
 retlist=getCoords(filelist,latBounds)
-lat=retlist[0]
-lon=retlist[1]
+lat=tofloat(retlist[0])
+lon=tofloat(retlist[1])
 if (minLonOut .ne. retlist[2]) then
   minLonOut=retlist[2]
   maxLonOut=retlist[3]
