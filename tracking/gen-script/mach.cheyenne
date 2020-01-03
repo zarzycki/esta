@@ -1,0 +1,13 @@
+##=======================================================================
+#PBS -N tempest-ETCs
+#PBS -A P54048000 
+#PBS -l walltime=0:29:00
+#PBS -q premium
+#PBS -k oe
+#PBS -m a 
+#PBS -M zarzycki@ucar.edu
+#PBS -l select=1:ncpus=36:mpiprocs=36
+################################################################
+
+RUNCOMMAND="mpiexec_mpt"
+

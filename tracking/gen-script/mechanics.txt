@@ -1,0 +1,31 @@
+############ TRACKER MECHANICS #####################
+
+DATESTRING=`date +"%s%N"`
+FILELISTNAME=filelist.txt.${DATESTRING}
+TRAJFILENAME=trajectories.txt.${UQSTR}
+FILTFILE=traj.filt
+touch $FILELISTNAME
+
+# Generate parallel file
+FILES=${PATHTOFILES}/*.h3.*.nc
+for f in $FILES
+do
+  echo "${f}" >> $FILELISTNAME
+done
+
+starttime=$(date -u +"%s")
+
+STR_DETECT="--verbosity 0 --timestride 2 ${CONNECTFLAG} --out cyclones_tempest.${DATESTRING} --mergedist 8.0 --closedcontourcmd PSL,200.,6.,0 --outputcmd PSL,min,0"
+touch cyclones.${DATESTRING}
+${RUNCOMMAND} ${TEMPESTEXTREMESDIR}/bin/DetectCyclonesUnstructured --in_data_list "${FILELISTNAME}" ${STR_DETECT} </dev/null
+cat cyclones_tempest.${DATESTRING}* >> cyclones.${DATESTRING}
+rm cyclones_tempest.${DATESTRING}*
+
+# Stitch candidate cyclones together
+${TEMPESTEXTREMESDIR}/bin/StitchNodes --format "ncol,lon,lat,slp" --in cyclones.${DATESTRING} --range 8.0 --minlength 5 --maxgap 0 --out ${TRAJFILENAME} --threshold "lat,>,25,3;lon,>,260,3;lat,<,65,3;lon,<,310,3"
+
+ncl filter_ne_storms.ncl 'infile="'${TRAJFILENAME}'"' 'outfile="'${FILTFILE}'"'
+
+rm cyclones.${DATESTRING}
+rm ${FILELISTNAME}
+rm log*

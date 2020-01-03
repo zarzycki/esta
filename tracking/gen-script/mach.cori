@@ -1,0 +1,12 @@
+#!/bin/bash -l
+
+################################################################
+#SBATCH -N 1                #Number of nodes
+#SBATCH -t 00:30:00         #Time limit
+#SBATCH -q debug          #Use the regular QOS
+#SBATCH -L SCRATCH          #Job requires $SCRATCH file system
+#SBATCH -C knl,quad,cache   #Use KNL nodes in quad cache format (default, recommended)
+################################################################
+
+RUNCOMMAND="srun -n 32"
+

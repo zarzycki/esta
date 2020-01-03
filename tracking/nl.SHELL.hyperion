@@ -1,0 +1,25 @@
+########################################################################################
+###### SETTINGS
+########################################################################################
+
+#---------------------------------- Optional
+
+CONFIG=dtime900.003
+GRID=WAT
+MACH=CORI
+
+#---------------------------------- Required
+
+# This is the path to TempestExtremes binary
+TEMPESTEXTREMESDIR=~/software/tempestextremes/
+
+# This a "unique" string that will carry through all the files
+UQSTR=TESTCORI
+
+# This is the top level path
+PATHTOFILES=/global/homes/c/czarzyck/scratch/hyperion/CORI.VR28.NATL.${GRID}.CAM5.4CLM5.0.${CONFIG}/atm/hist/
+
+# CONNECTFLAG sets a TempestExtremes connect file if needed -- if you are using lat/lon
+# data supported, just leave this string empty
+CONNECTFLAG="--in_connect /global/homes/c/czarzyck/tempest-scripts/hyperion/ne0np4natlantic${GRID,,}.ne30x4.connect.dat"
+
