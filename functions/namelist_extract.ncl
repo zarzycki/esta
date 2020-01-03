@@ -52,9 +52,10 @@ begin
 
 ;---Number of fields for 'namlst(iKEY)' line.  This includes the keyword.
    nfld  = str_fields_count(namlst(iKEY), delim)   
+   print(nfld+" ")
    chr   := tochar(namlst(iKEY))
    nchr   = dimsizes(chr)
-   if (chr(nchr-1).eq.",") then
+   if (chr(nchr-1).eq."," .or. return_type.ne."string") then
        nfld = nfld-1
    end if
 

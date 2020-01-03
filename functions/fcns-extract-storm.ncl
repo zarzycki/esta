@@ -1,9 +1,28 @@
 function buildTimeLookup(filelist)
 ; Pass in a filelist of CAM files, build a lookup table for filename and time indices
-local ftmp, nfiles, nftimes, timeArr, listArr, ii, maxtimes
+local ftmp, nfiles, nftimes, timeArr, listArr, ii, maxtimes, myunits, mycalendar
 begin
   ; Here we build a "lookup" table to find what times are on what files...
   ; get list of h3 files
+
+  ; first check for units/calendar on first file
+  ; if no units, we really can't recover. if no calendar, default to standard
+  ; but print warning
+  ftmp = addfile(filelist(0),"r")
+  if (isatt(ftmp->time,"units")) then
+    myunits=ftmp->time@units
+  else
+    print("buildTimeLookup: No units attribute on time index, exiting...")
+    exit
+  end if
+  if (isatt(ftmp->time,"calendar")) then
+    mycalendar=ftmp->time@calendar
+  else
+    print("buildTimeLookup: No calendar attribute on time index...")
+    print("buildTimeLookup: WARNING, defaulting to standard, this may not be correct...")
+    mycalendar="standard"
+  end if
+
   nfiles = dimsizes(filelist)
   maxtimes=-1
   do ii = 0,nfiles-1
@@ -21,12 +40,9 @@ begin
   end do
   timeArr!0="files"
   timeArr&files=listArr
-  timeunits=ftmp->time@units
-  opt=0
-  opt@calendar=ftmp->time@calendar
+  timeArr@units=myunits
+  timeArr@calendar=mycalendar
 
-  timeArr@units=timeunits
-  timeArr@calendar=ftmp->time@calendar
   delete(ftmp)
   return(timeArr)
 end
@@ -74,7 +90,12 @@ begin
   lon=ftmp->lon({minLonOut:maxLonOut})
   timeunits=ftmp->time@units
   opt=0
-  opt@calendar=ftmp->time@calendar
+  if (isatt(ftmp->time,"calendar")) then
+    opt@calendar=ftmp->time@calendar
+  else
+    print("getCoords: No calendar attribute on time index, defaulting to standard...")
+    opt@calendar="standard"
+  end if
   delete(ftmp)
   return( [/ lat,lon,minLonOut,maxLonOut,timeunits,opt /] )
 end
